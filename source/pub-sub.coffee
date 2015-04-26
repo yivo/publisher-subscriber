@@ -24,7 +24,7 @@ exports.on = (events, callback, subscriber) ->
       j = 0
     else ++j
 
-  (subscriber._subscribedTo ||= {})[@oid ||= genOid()] = @
+  (subscriber._subscribedTo ||= {})[@oid ||= generateId()] = @
   this
 
 # Version of `on` which works the same way, but callback will be invoked only once
@@ -72,7 +72,7 @@ exports.bind = (events, callback, subscriber) ->
 
 exports.off = exports.unbind = (arg1, arg2, arg3) ->
   return this unless @_events
-  oid = @oid ||= genOid()
+  oid = @oid ||= generateId()
 
   # obj.off()
   if arguments.length is 0
@@ -153,15 +153,8 @@ exports.notify = (event) ->
       fireCallbacks(allEvents, args)
   this
 
-{isFunction, isObject, isString, uniqueId} = _
-
-slice = Array::slice
-
-mapMethod = (object, method) ->
-  if isFunction(method) then method else object and object[method]
-
-genOid = ->
-  +uniqueId()
+{isObject, isString} = _
+{mapMethod, generateId, apply, slice} = yess
 
 filterSubscriptions = (subscriber, callback, data) ->
   i = -2
@@ -177,18 +170,6 @@ filterSubscriptions = (subscriber, callback, data) ->
         i -= 2
         len -= 2
   return
-
-# @see http://jsperf.com/apply-vs-custom-apply
-apply = (func, obj, args) ->
-  arg1 = args[0]
-  arg2 = args[1]
-  arg3 = args[2]
-  switch args.length
-    when 0 then func.call(obj)
-    when 1 then func.call(obj, arg1)
-    when 2 then func.call(obj, arg1, arg2)
-    when 3 then func.call(obj, arg1, arg2, arg3)
-    else func.apply(obj, args)
 
 # @see http://jsperf.com/apply-vs-custom-apply
 fireCallbacks = (data, args) ->

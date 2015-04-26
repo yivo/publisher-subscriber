@@ -1,14 +1,14 @@
 (function() {
   (function(root, factory) {
     if (typeof define === 'function' && define.amd) {
-      return define(['lodash'], factory);
+      return define(['lodash', 'yess'], factory);
     } else if (typeof module === 'object' && typeof module.exports === 'object') {
-      return module.exports = factory(require('lodash'));
+      return module.exports = factory(require('lodash'), require('yess'));
     } else {
-      return root.PublisherSubscriber = factory(root._);
+      return root.PublisherSubscriber = factory(root._, root.yess);
     }
-  })(this, function(_) {
-    var apply, exports, filterSubscriptions, fireCallbacks, genOid, isFunction, isObject, isString, mapMethod, slice, uniqueId;
+  })(this, function(_, yess) {
+    var apply, exports, filterSubscriptions, fireCallbacks, generateId, isObject, isString, mapMethod, slice;
     exports = {};
     exports.on = function(events, callback, subscriber) {
       var i, j, len, name, subscriptions;
@@ -27,7 +27,7 @@
           ++j;
         }
       }
-      (subscriber._subscribedTo || (subscriber._subscribedTo = {}))[this.oid || (this.oid = genOid())] = this;
+      (subscriber._subscribedTo || (subscriber._subscribedTo = {}))[this.oid || (this.oid = generateId())] = this;
       return this;
     };
     exports.once = function(events, callback, subscriber) {
@@ -62,7 +62,7 @@
       if (!this._events) {
         return this;
       }
-      oid = this.oid || (this.oid = genOid());
+      oid = this.oid || (this.oid = generateId());
       if (arguments.length === 0) {
         ref = this._events;
         for (event in ref) {
@@ -150,18 +150,8 @@
       }
       return this;
     };
-    isFunction = _.isFunction, isObject = _.isObject, isString = _.isString, uniqueId = _.uniqueId;
-    slice = Array.prototype.slice;
-    mapMethod = function(object, method) {
-      if (isFunction(method)) {
-        return method;
-      } else {
-        return object && object[method];
-      }
-    };
-    genOid = function() {
-      return +uniqueId();
-    };
+    isObject = _.isObject, isString = _.isString;
+    mapMethod = yess.mapMethod, generateId = yess.generateId, apply = yess.apply, slice = yess.slice;
     filterSubscriptions = function(subscriber, callback, data) {
       var i, len;
       i = -2;
@@ -176,24 +166,6 @@
             len -= 2;
           }
         }
-      }
-    };
-    apply = function(func, obj, args) {
-      var arg1, arg2, arg3;
-      arg1 = args[0];
-      arg2 = args[1];
-      arg3 = args[2];
-      switch (args.length) {
-        case 0:
-          return func.call(obj);
-        case 1:
-          return func.call(obj, arg1);
-        case 2:
-          return func.call(obj, arg1, arg2);
-        case 3:
-          return func.call(obj, arg1, arg2, arg3);
-        default:
-          return func.apply(obj, args);
       }
     };
     fireCallbacks = function(data, args) {

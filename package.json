@@ -2,7 +2,7 @@
   "name": "pub-sub",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "build/pub-sub.js",
   "scripts": {
     "test": "gulp build coffeespec && jasmine"
   },
@@ -17,14 +17,15 @@
     "gulp-concat": "^2.2.0",
     "gulp-connect": "^2.0.5",
     "gulp-iife": "git://github.com/yivo/gulp-iife",
+    "gulp-plumber": "^1.0.0",
     "gulp-preprocess": "^1.2.0",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^1.2.0",
     "jasmine": "^2.2.1",
-    "jsdom": "^0.11.1",
     "preprocess": "^2.1.1"
   },
   "dependencies": {
-    "lodash": "^3.6.0"
+    "lodash": "^3.6.0",
+    "yess": "git://github.com/yivo/yess"
   }
 }
