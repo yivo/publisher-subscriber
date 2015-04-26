@@ -6,7 +6,7 @@
     module.exports = factory(root, require('lodash'), require('yess'))
   else
     root.PublisherSubscriber = factory(root, root._, root.yess)
-)(@, (root, _, yess) ->
+)(this, (root, _, yess) ->
   exports = {}
   
   # Set callback to be invoked when object notifies about events
