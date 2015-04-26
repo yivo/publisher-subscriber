@@ -1,12 +1,12 @@
 ((root, factory) ->
   if typeof define is 'function' and define.amd
-    define(['lodash','yess'], factory)
+    define ['lodash', 'yess'], (_, yess) ->
+      root.PublisherSubscriber = factory(root, _, yess)
   else if typeof module is 'object' && typeof module.exports is 'object'
-    module.exports = factory(require('lodash'),require('yess'))
+    module.exports = factory(root, require('lodash'), require('yess'))
   else
-    root.PublisherSubscriber = factory(root._,root.yess)
-)(@, (_,yess) ->
-
+    root.PublisherSubscriber = factory(root, root._, root.yess)
+)(@, (root, _, yess) ->
   exports = {}
   
   # Set callback to be invoked when object notifies about events

@@ -1,13 +1,15 @@
 (function() {
   (function(root, factory) {
     if (typeof define === 'function' && define.amd) {
-      return define(['lodash', 'yess'], factory);
+      return define(['lodash', 'yess'], function(_, yess) {
+        return root.PublisherSubscriber = factory(root, _, yess);
+      });
     } else if (typeof module === 'object' && typeof module.exports === 'object') {
-      return module.exports = factory(require('lodash'), require('yess'));
+      return module.exports = factory(root, require('lodash'), require('yess'));
     } else {
-      return root.PublisherSubscriber = factory(root._, root.yess);
+      return root.PublisherSubscriber = factory(root, root._, root.yess);
     }
-  })(this, function(_, yess) {
+  })(this, function(root, _, yess) {
     var apply, exports, filterSubscriptions, fireCallbacks, generateId, isObject, isString, mapMethod, slice;
     exports = {};
     exports.on = function(events, callback, subscriber) {
