@@ -1,17 +1,18 @@
 (function() {
   (function(root, factory) {
     if (typeof define === 'function' && define.amd) {
-      return define(['lodash', 'yess'], function(_, yess) {
-        return root.PublisherSubscriber = factory(root, _, yess);
+      define(['lodash', 'yess'], function(_) {
+        return root.PublisherSubscriber = factory(root, _);
       });
     } else if (typeof module === 'object' && typeof module.exports === 'object') {
-      return module.exports = factory(root, require('lodash'), require('yess'));
+      module.exports = factory(root, require('lodash'), require('yess'));
     } else {
-      return root.PublisherSubscriber = factory(root, root._, root.yess);
+      root.PublisherSubscriber = factory(root, root._);
     }
-  })(this, function(root, _, yess) {
-    var apply, exports, filterSubscriptions, fireCallbacks, generateId, isObject, isString, mapMethod, slice;
+  })(this, function(root, _) {
+    var applyWith, exports, filterSubscriptions, fireCallbacks, generateId, isObject, isString, mapMethod, nativeSlice;
     exports = {};
+    isObject = _.isObject, isString = _.isString, mapMethod = _.mapMethod, generateId = _.generateId, applyWith = _.applyWith, nativeSlice = _.nativeSlice;
     exports.on = function(events, callback, subscriber) {
       var i, j, len, name, subscriptions;
       subscriptions = (this._events || (this._events = {}));
@@ -120,18 +121,18 @@
       var allEvents, args, callback, givenEvent, omitted;
       callback = this['on' + event[0].toUpperCase() + event.slice(1)];
       if (callback) {
-        args = slice.call(arguments, 1);
+        args = nativeSlice.call(arguments, 1);
         if (args[0] === this) {
           args.shift();
           omitted = true;
         }
-        apply(callback, this, args);
+        applyWith(callback, this, args);
       }
       if (this._events) {
         givenEvent = this._events[event];
         allEvents = this._events.all;
         if (givenEvent && givenEvent.length) {
-          args || (args = slice.call(arguments, 1));
+          args || (args = nativeSlice.call(arguments, 1));
           if (omitted) {
             args.unshift(this);
             omitted = false;
@@ -145,15 +146,13 @@
             }
             args.unshift(event);
           } else {
-            args = slice.call(arguments);
+            args = nativeSlice.call(arguments);
           }
           fireCallbacks(allEvents, args);
         }
       }
       return this;
     };
-    isObject = _.isObject, isString = _.isString;
-    mapMethod = yess.mapMethod, generateId = yess.generateId, apply = yess.apply, slice = yess.slice;
     filterSubscriptions = function(subscriber, callback, data) {
       var i, len;
       i = -2;

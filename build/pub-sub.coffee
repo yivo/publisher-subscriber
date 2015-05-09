@@ -1,13 +1,16 @@
 ((root, factory) ->
   if typeof define is 'function' and define.amd
-    define ['lodash', 'yess'], (_, yess) ->
-      root.PublisherSubscriber = factory(root, _, yess)
+    define ['lodash', 'yess'], (_) ->
+      root.PublisherSubscriber = factory(root, _)
   else if typeof module is 'object' && typeof module.exports is 'object'
     module.exports = factory(root, require('lodash'), require('yess'))
   else
-    root.PublisherSubscriber = factory(root, root._, root.yess)
-)(this, (root, _, yess) ->
+    root.PublisherSubscriber = factory(root, root._)
+  return
+)(this, (root, _) ->
   exports = {}
+  
+  {isObject, isString, mapMethod, generateId, applyWith, nativeSlice} = _
   
   # Set callback to be invoked when object notifies about events
   #
@@ -133,18 +136,18 @@
     callback = @['on' + event[0].toUpperCase() + event.slice(1)]
   
     if callback
-      args = slice.call(arguments, 1)
+      args = nativeSlice.call(arguments, 1)
       if args[0] is this
         args.shift()
         omitted = yes
-      apply(callback, this, args)
+      applyWith(callback, this, args)
   
     if @_events
       givenEvent = @_events[event]
       allEvents = @_events.all
   
       if givenEvent and givenEvent.length
-        args ||= slice.call(arguments, 1)
+        args ||= nativeSlice.call(arguments, 1)
   
         if omitted
           args.unshift(this)
@@ -157,13 +160,10 @@
           args.unshift(this) if omitted
           args.unshift(event)
         else
-          args = slice.call(arguments)
+          args = nativeSlice.call(arguments)
   
         fireCallbacks(allEvents, args)
     this
-  
-  {isObject, isString} = _
-  {mapMethod, generateId, apply, slice} = yess
   
   filterSubscriptions = (subscriber, callback, data) ->
     i = -2
