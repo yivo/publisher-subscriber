@@ -11,20 +11,9 @@ plumber     = require 'gulp-plumber'
 
 gulp.task 'default', ['build', 'watch'], ->
 
-dependencies = [
-  {name: 'lodash', as: '_'},
-  {name: 'yess'}
-]
-
 gulp.task 'build', ->
-  gulp.src('source/manifest.coffee')
+  gulp.src('source/pub-sub.js')
   .pipe plumber()
-  .pipe preprocess()
-  .pipe iife {global: 'PublisherSubscriber', dependencies}
-  .pipe concat('pub-sub.coffee')
-  .pipe gulp.dest('build')
-  .pipe coffee()
-  .pipe concat('pub-sub.js')
   .pipe gulp.dest('build')
 
 gulp.task 'build-min', ['build'], ->
@@ -37,7 +26,6 @@ gulp.task 'watch', ->
   gulp.watch 'source/**/*', ['build']
 
 gulp.task 'coffeespec', ->
-  del.sync 'spec/**/*.js'
   gulp.src('coffeespec/**/*.coffee')
   .pipe coffee(bare: yes)
   .pipe gulp.dest('spec')
