@@ -273,17 +273,19 @@
     Events.unbind = Events.off;
     Events.notify = Events.trigger;
 
-    Events.isNoisy = function(options) {
-        // null, undefined => true
-        // true            => true
-        // false           => false
-        // {}              => true
-        // {silent: *}     => !silent
-        return options !== false && (options && options.silent) !== true;
-    };
+    Events.ClassMembers = {
+        isNoisy: function(options) {
+            // null, undefined => true
+            // true            => true
+            // false           => false
+            // {}              => true
+            // {silent: *}     => !silent
+            return options !== false && (options && options.silent) !== true;
+        },
 
-    Events.isEventable = function(obj) {
-        return obj && obj.on === Events.on;
+        isEventable: function(obj) {
+            return obj && obj.on === Events.on;
+        }
     };
 
     return Events;
