@@ -38,7 +38,10 @@
             // Handle event maps.
             if (callback !== void 0 && 'context' in opts && opts.context === void 0) opts.context = callback;
             for (names = _.keys(name); i < names.length ; i++) {
-                memo = iteratee(memo, names[i], name[names[i]], opts);
+                var parts = names[i].split(' ');
+                for (var k = 0; k < parts.length; ++k) {
+                    memo = iteratee(memo, parts[k], _.mapMethod(opts.context, name[names[i]]), opts);
+                }
             }
         } else if (name && eventSplitter.test(name)) {
             // Handle space separated event names.
@@ -232,11 +235,19 @@
     // (unless you're listening on `"all"`, which will cause your callback to
     // receive the true name of the event as the first argument).
     Events.trigger =  function(name) {
-        if (!this._events) return this;
 
         var length = Math.max(0, arguments.length - 1);
         var args = Array(length);
         for (var i = 0; i < length; i++) args[i] = arguments[i + 1];
+
+        var events = name.split(' ');
+        for (var i = 0; i < events.length; ++i) {
+            //alert('on' + events[i].capitalize());
+            if (this['on' + events[i].capitalize()]) {
+                this['on' + events[i].capitalize()].apply(this, args);
+            }
+        }
+        if (!this._events) return this;
 
         eventsApi(triggerApi, this._events, name, void 0, args);
         return this;
