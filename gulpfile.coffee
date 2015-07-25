@@ -16,12 +16,6 @@ gulp.task 'build', ->
   .pipe plumber()
   .pipe gulp.dest('build')
 
-gulp.task 'build-min', ['build'], ->
-  gulp.src('build/pub-sub.js')
-  .pipe uglify()
-  .pipe rename('pub-sub.min.js')
-  .pipe gulp.dest('build')
-
 gulp.task 'watch', ->
   gulp.watch 'source/**/*', ['build']
 

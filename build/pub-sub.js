@@ -284,7 +284,10 @@
     Events.unbind = Events.off;
     Events.notify = Events.trigger;
 
-    Events.ClassMembers = {
+    var PublisherSubscriber = {};
+    PublisherSubscriber.InstanceMembers = Events;
+
+    PublisherSubscriber.ClassMembers = {
         isNoisy: function(options) {
             // null, undefined => true
             // true            => true
@@ -299,5 +302,5 @@
         }
     };
 
-    return Events;
+    return PublisherSubscriber;
 });
