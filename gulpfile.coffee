@@ -14,6 +14,7 @@ gulp.task 'default', ['build', 'watch'], ->
 gulp.task 'build', ->
   gulp.src('source/pub-sub.js')
   .pipe plumber()
+  .pipe rename('publisher-subscriber.js')
   .pipe gulp.dest('build')
 
 gulp.task 'watch', ->
