@@ -235,19 +235,39 @@
     // (unless you're listening on `"all"`, which will cause your callback to
     // receive the true name of the event as the first argument).
     Events.trigger =  function(name) {
+        var argsLength = Math.max(0, arguments.length - 1);
+        var args, k, e;
+        var i = -1;
+        var j = 0;
+        var l = name.length;
 
-        var length = Math.max(0, arguments.length - 1);
-        var args = Array(length);
-        for (var i = 0; i < length; i++) args[i] = arguments[i + 1];
+        while (++i <= l) {
+            if (i === l || name[i] === ' ') {
+                if (j > 0) {
+                    e = name.slice(i - j, i);
+                    e = 'on' + e[0].toUpperCase() + e.slice(1);
 
-        var events = name.split(' ');
-        for (var i = 0; i < events.length; ++i) {
-            //alert('on' + events[i].capitalize());
-            if (this['on' + events[i].capitalize()]) {
-                this['on' + events[i].capitalize()].apply(this, args);
+                    if (this[e]) {
+                        if (!args) {
+                            args = Array(argsLength);
+                            for (k = 0; k < argsLength; k++) args[k] = arguments[k + 1];
+                        }
+                        this[e].apply(this, args);
+                    }
+                }
+                j = 0;
+            } else {
+                ++j;
             }
         }
+
+
         if (!this._events) return this;
+
+        if (!args) {
+            args = Array(argsLength);
+            for (k = 0; k < argsLength; k++) args[k] = arguments[k + 1];
+        }
 
         eventsApi(triggerApi, this._events, name, void 0, args);
         return this;
