@@ -7,6 +7,10 @@
     "test": "gulp build && jasmine"
   },
   "author": "Yaroslav Konoplov",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/yivo/publisher-subscriber.git"
+  },
   "license": "MIT",
   "devDependencies": {
     "backbone": "^1.2.3",
