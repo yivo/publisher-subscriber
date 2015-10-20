@@ -1,0 +1,19 @@
+{
+  "name": "publisher-subscriber",
+  "version": "1.0.0",
+  "main": "build/publisher-subscriber.js",
+  "description": "Publisher-subscriber pattern",
+  "authors": [
+    "Yaroslav Konoplov <yaroslav@inbox.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "spec",
+    "coffeespec",
+    "gulpfile.*"
+  ]
+}

@@ -6,7 +6,7 @@
   "scripts": {
     "test": "gulp build && jasmine"
   },
-  "author": "Yaroslav Konoplov",
+  "author": "Yaroslav Konoplov <yaroslav@inbox.com>",
   "repository": {
     "type": "git",
     "url": "git://github.com/yivo/publisher-subscriber.git"
