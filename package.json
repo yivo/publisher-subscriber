@@ -1,8 +1,8 @@
 {
-  "name": "pub-sub",
+  "name": "publisher-subscriber",
   "version": "1.0.0",
-  "description": "",
-  "main": "build/pub-sub.js",
+  "description": "Publisher-subscriber pattern",
+  "main": "build/publisher-subscriber.js",
   "scripts": {
     "test": "gulp build && jasmine"
   },
