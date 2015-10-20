@@ -1,15 +1,15 @@
 {
-  "name": "publisher-subscriber",
+  "name": "pub-sub",
   "version": "1.0.0",
   "description": "",
   "main": "build/pub-sub.js",
   "scripts": {
-    "test": "gulp build coffeespec && jasmine"
+    "test": "gulp build && jasmine"
   },
   "author": "Yaroslav Konoplov",
   "license": "MIT",
   "devDependencies": {
-    "backbone": "^1.2.1",
+    "backbone": "^1.2.3",
     "benchmark": "^1.0.0",
     "codo": "^2.0.11",
     "coffee-script": "^1.9.1",
@@ -18,7 +18,9 @@
     "gulp-coffee": "^2.3.1",
     "gulp-concat": "^2.2.0",
     "gulp-connect": "^2.0.5",
-    "gulp-iife": "yivo/gulp-iife",
+    "gulp-ejs": "^1.2.1",
+    "gulp-iife": "git://github.com/yivo/gulp-iife",
+    "gulp-lazyload": "git://github.com/yivo/gulp-lazyload",
     "gulp-plumber": "^1.0.0",
     "gulp-preprocess": "^1.2.0",
     "gulp-rename": "^1.2.2",

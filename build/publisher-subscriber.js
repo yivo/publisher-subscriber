@@ -1,326 +1,474 @@
-(function(root, factory) {
+(function() {
+  var hasProp = {}.hasOwnProperty;
+
+  (function(root, factory) {
     if (typeof define === 'function' && define.amd) {
-        define(['lodash'], function(_) {
-            return root.PublisherSubscriber = factory(root, _);
-        });
+      root.PublisherSubscriber = factory(root);
+      define(function() {
+        return root.PublisherSubscriber;
+      });
     } else if (typeof module === 'object' && typeof module.exports === 'object') {
-        module.exports = factory(root, require('lodash'));
+      module.exports = factory(root);
     } else {
-        root.PublisherSubscriber = factory(root, root._);
+      root.PublisherSubscriber = factory(root);
     }
-})(this, function(__root__, _) {
-    // Backbone.Events
-    // ---------------
-
-    // A module that can be mixed in to *any object* in order to provide it with
-    // custom events. You may bind with `on` or remove with `off` callback
-    // functions to an event; `trigger`-ing an event fires all callbacks in
-    // succession.
-    //
-    //     var object = {};
-    //     _.extend(object, Backbone.Events);
-    //     object.on('expand', function(){ alert('expanded'); });
-    //     object.trigger('expand');
-    //
-    var Events = {};
-
-    // Regular expression used to split event strings.
-    var eventSplitter = /\s+/;
-
-    // Iterates over the standard `event, callback` (as well as the fancy multiple
-    // space-separated events `"change blur", callback` and jQuery-style event
-    // maps `{event: callback}`), reducing them by manipulating `memo`.
-    // Passes a normalized single event name and callback, as well as any
-    // optional `opts`.
-    var eventsApi = function(iteratee, memo, name, callback, opts) {
-        var i = 0, names;
-        if (name && typeof name === 'object') {
-            // Handle event maps.
-            if (callback !== void 0 && 'context' in opts && opts.context === void 0) opts.context = callback;
-            for (names = _.keys(name); i < names.length ; i++) {
-                var parts = names[i].split(' ');
-                for (var k = 0; k < parts.length; ++k) {
-                    memo = iteratee(memo, parts[k], _.mapMethod(opts.context, name[names[i]]), opts);
-                }
-            }
-        } else if (name && eventSplitter.test(name)) {
-            // Handle space separated event names.
-            for (names = name.split(eventSplitter); i < names.length; i++) {
-                memo = iteratee(memo, names[i], callback, opts);
-            }
-        } else {
-            memo = iteratee(memo, name, callback, opts);
-        }
-        return memo;
+  })(this, function(__root__) {
+    var PB, decrementListeningCount, fastProperty, generateOID, getOID, increaseListeningCount, isEventable, isNoisy, resolveCallback;
+    PB = {};
+    generateOID = (function() {
+      var counter;
+      counter = 0;
+      return function() {
+        return ++counter;
+      };
+    })();
+    getOID = function(object) {
+      return object.oid || (object.oid = generateOID());
     };
-
-    // Bind an event to a `callback` function. Passing `"all"` will bind
-    // the callback to all events fired.
-    Events.on = function(name, callback, context) {
-        return internalOn(this, name, callback, context);
+    resolveCallback = function(object, callback) {
+      if (typeof callback === 'string') {
+        return object[callback];
+      } else {
+        return callback;
+      }
     };
-
-    // An internal use `on` function, used to guard the `listening` argument from
-    // the public API.
-    var internalOn = function(obj, name, callback, context, listening) {
-        obj._events = eventsApi(onApi, obj._events || {}, name, callback, {
-            context: context,
-            ctx: obj,
-            listening: listening
-        });
-
-        if (listening) {
-            var listeners = obj._listeners || (obj._listeners = {});
-            listeners[listening.id] = listening;
-        }
-
-        return obj;
+    increaseListeningCount = function(pub, sub, n) {
+      var listening, name, record;
+      listening = (sub._pbTo || (sub._pbTo = {}));
+      record = (listening[name = getOID(pub)] || (listening[name] = [pub, 0]));
+      record[1] += n || 1;
     };
-
-    // Inversion-of-control versions of `on`. Tell *this* object to listen to
-    // an event in another object... keeping track of what it's listening to.
-    Events.listenTo =  function(obj, name, callback) {
-        if (!obj) return this;
-        var id = obj._listenId || (obj._listenId = _.uniqueId('l'));
-        var listeningTo = this._listeningTo || (this._listeningTo = {});
-        var listening = listeningTo[id];
-
-        // This object is not listening to any other events on `obj` yet.
-        // Setup the necessary references to track the listening callbacks.
-        if (!listening) {
-            var thisId = this._listenId || (this._listenId = _.uniqueId('l'));
-            listening = listeningTo[id] = {obj: obj, objId: id, id: thisId, listeningTo: listeningTo, count: 0};
-        }
-
-        // Bind callbacks on obj, and keep track of them on listening.
-        internalOn(obj, name, callback, this, listening);
-        return this;
+    decrementListeningCount = function(pub, sub, n) {
+      var oid, record;
+      oid = getOID(pub);
+      record = sub._pbTo[oid];
+      if (record && (record[1] -= n || 1) < 1) {
+        delete sub._pbTo[oid];
+      }
     };
-
-    // The reducing API that adds a callback to the `events` object.
-    var onApi = function(events, name, callback, options) {
-        if (callback) {
-            var handlers = events[name] || (events[name] = []);
-            var context = options.context, ctx = options.ctx, listening = options.listening;
-            if (listening) listening.count++;
-
-            handlers.push({ callback: callback, context: context, ctx: context || ctx, listening: listening });
-        }
-        return events;
+    fastProperty = function(prop) {
+      return prop;
     };
-
-    // Remove one or many callbacks. If `context` is null, removes all
-    // callbacks with that function. If `callback` is null, removes all
-    // callbacks for the event. If `name` is null, removes all bound
-    // callbacks for all events.
-    Events.off =  function(name, callback, context) {
-        if (!this._events) return this;
-        this._events = eventsApi(offApi, this._events, name, callback, {
-            context: context,
-            listeners: this._listeners
-        });
-        return this;
+    isNoisy = function(options) {
+      return options !== false && (options && options.silent) !== true;
     };
-
-    // Tell this object to stop listening to either specific events ... or
-    // to every object it's currently listening to.
-    Events.stopListening =  function(obj, name, callback) {
-        var listeningTo = this._listeningTo;
-        if (!listeningTo) return this;
-
-        var ids = obj ? [obj._listenId] : _.keys(listeningTo);
-
-        for (var i = 0; i < ids.length; i++) {
-            var listening = listeningTo[ids[i]];
-
-            // If listening doesn't exist, this object is not currently
-            // listening to obj. Break out early.
-            if (!listening) break;
-
-            listening.obj.off(name, callback, this);
-        }
-        if (_.isEmpty(listeningTo)) this._listeningTo = void 0;
-
-        return this;
+    isEventable = function(obj) {
+      return obj && obj.on === PB.on;
     };
-
-    // The reducing API that removes a callback from the `events` object.
-    var offApi = function(events, name, callback, options) {
-        // No events to consider.
-        if (!events) return;
-
-        var i = 0, listening;
-        var context = options.context, listeners = options.listeners;
-
-        // Delete all events listeners and "drop" events.
-        if (!name && !callback && !context) {
-            var ids = _.keys(listeners);
-            for (; i < ids.length; i++) {
-                listening = listeners[ids[i]];
-                delete listeners[listening.id];
-                delete listening.listeningTo[listening.objId];
-            }
-            return;
-        }
-
-        var names = name ? [name] : _.keys(events);
-        for (; i < names.length; i++) {
-            name = names[i];
-            var handlers = events[name];
-
-            // Bail out if there are no events stored.
-            if (!handlers) break;
-
-            // Replace events if there are any remaining.  Otherwise, clean up.
-            var remaining = [];
-            for (var j = 0; j < handlers.length; j++) {
-                var handler = handlers[j];
-                if (
-                    callback && callback !== handler.callback &&
-                    callback !== handler.callback._callback ||
-                    context && context !== handler.context
-                ) {
-                    remaining.push(handler);
-                } else {
-                    listening = handler.listening;
-                    if (listening && --listening.count === 0) {
-                        delete listeners[listening.id];
-                        delete listening.listeningTo[listening.objId];
-                    }
-                }
-            }
-
-            // Update tail event if the list has any events.  Otherwise, clean up.
-            if (remaining.length) {
-                events[name] = remaining;
-            } else {
-                delete events[name];
-            }
-        }
-        if (_.size(events)) return events;
-    };
-
-    // Bind an event to only be triggered a single time. After the first time
-    // the callback is invoked, it will be removed. When multiple events are
-    // passed in using the space-separated syntax, the event will fire once for every
-    // event you passed in, not once for a combination of all events
-    Events.once =  function(name, callback, context) {
-        // Map the event into a `{event: once}` object.
-        var events = eventsApi(onceMap, {}, name, callback, _.bind(this.off, this));
-        return this.on(events, void 0, context);
-    };
-
-    // Inversion-of-control versions of `once`.
-    Events.listenToOnce =  function(obj, name, callback) {
-        // Map the event into a `{event: once}` object.
-        var events = eventsApi(onceMap, {}, name, callback, _.bind(this.stopListening, this, obj));
-        return this.listenTo(obj, events);
-    };
-
-    // Reduces the event callbacks into a map of `{event: onceWrapper}`.
-    // `offer` unbinds the `onceWrapper` after it has been called.
-    var onceMap = function(map, name, callback, offer) {
-        if (callback) {
-            var once = map[name] = _.once(function() {
-                offer(name, once);
-                callback.apply(this, arguments);
-            });
-            once._callback = callback;
-        }
-        return map;
-    };
-
-    // Trigger one or many events, firing all bound callbacks. Callbacks are
-    // passed the same arguments as `trigger` is, apart from the event name
-    // (unless you're listening on `"all"`, which will cause your callback to
-    // receive the true name of the event as the first argument).
-    Events.trigger =  function(name) {
-        var argsLength = Math.max(0, arguments.length - 1);
-        var args, k, e;
-        var i = -1;
-        var j = 0;
-        var l = name.length;
-
+    (function() {
+      var bind__Base, bind__EventMap, bind__EventString, fn, k, onceWrap, ref, v;
+      onceWrap = function(pub, event, callback, context) {
+        var run, wrapper;
+        run = false;
+        wrapper = function() {
+          if (!run) {
+            run = true;
+            pub.off(event, wrapper, context);
+            callback.apply(context, arguments);
+          }
+        };
+        wrapper._cb = callback;
+        return wrapper;
+      };
+      bind__Base = function(object, event, callback, context, once) {
+        var base, cb;
+        cb = once ? onceWrap(object, event, callback, context) : callback;
+        return ((base = (object._pb || (object._pb = {})))[event] || (base[event] = [])).push(void 0, cb, context);
+      };
+      bind__EventString = function(object, events, callback, context, once) {
+        var i, j, l;
+        l = events.length;
+        i = -1;
+        j = 0;
         while (++i <= l) {
-            if (i === l || name[i] === ' ') {
-                if (j > 0) {
-                    e = name.slice(i - j, i);
-                    e = 'on' + e[0].toUpperCase() + e.slice(1);
-
-                    if (this[e]) {
-                        if (!args) {
-                            args = Array(argsLength);
-                            for (k = 0; k < argsLength; k++) args[k] = arguments[k + 1];
-                        }
-                        this[e].apply(this, args);
-                    }
+          if (i === l || events[i] === ' ') {
+            if (j > 0) {
+              bind__Base(object, events.slice(i - j, i), callback, context, once);
+              j = 0;
+            }
+          } else {
+            ++j;
+          }
+        }
+      };
+      bind__EventMap = function(object, hash, context, once) {
+        var events;
+        for (events in hash) {
+          bind__EventString(object, events, resolveCallback(object, hash[events]), context, once);
+        }
+      };
+      ref = {
+        bind: false,
+        bindOnce: true
+      };
+      fn = function(method, once) {
+        return PB[method] = function(events, callback, context) {
+          if (typeof events === 'string') {
+            if (callback) {
+              bind__EventString(this, events, resolveCallback(this, callback), context || this, once);
+            }
+          } else {
+            bind__EventMap(this, events, context || callback || this, once);
+          }
+          return this;
+        };
+      };
+      for (k in ref) {
+        if (!hasProp.call(ref, k)) continue;
+        v = ref[k];
+        fn(k, v);
+      }
+      PB.on = PB.bind;
+      PB.once = PB.bindOnce;
+    })();
+    (function() {
+      var fn, k, listenTo__Base, listenTo__EventMap, listenTo__EventString, onceWrap, ref, v;
+      onceWrap = function(pub, sub, event, callback) {
+        var run, wrapper;
+        run = false;
+        wrapper = function() {
+          if (!run) {
+            run = true;
+            sub.stopListening(pub, event, wrapper);
+            callback.apply(sub, arguments);
+          }
+        };
+        wrapper._cb = callback;
+        return wrapper;
+      };
+      listenTo__Base = function(pub, sub, event, callback, once) {
+        var base, cb;
+        cb = once ? onceWrap(pub, sub, event, callback) : callback;
+        ((base = (pub._pb || (pub._pb = {})))[event] || (base[event] = [])).push(sub, cb, sub);
+        increaseListeningCount(pub, sub);
+      };
+      listenTo__EventString = function(pub, sub, events, callback, once) {
+        var i, j, l;
+        l = events.length;
+        i = -1;
+        j = 0;
+        while (++i <= l) {
+          if (i === l || events[i] === ' ') {
+            if (j > 0) {
+              listenTo__Base(pub, sub, events.slice(i - j, i), callback, once);
+              j = 0;
+            }
+          } else {
+            ++j;
+          }
+        }
+      };
+      listenTo__EventMap = function(pub, sub, hash, once) {
+        var events;
+        for (events in hash) {
+          listenTo__EventString(pub, sub, events, resolveCallback(sub, hash[events]), once);
+        }
+      };
+      ref = {
+        listenTo: false,
+        listenToOnce: true
+      };
+      fn = function(method, once) {
+        return PB[method] = function(object, events, callback) {
+          if (typeof events === 'string') {
+            if (callback) {
+              listenTo__EventString(object, this, events, resolveCallback(this, callback), once);
+            }
+          } else {
+            listenTo__EventMap(object, this, events, once);
+          }
+          return this;
+        };
+      };
+      for (k in ref) {
+        if (!hasProp.call(ref, k)) continue;
+        v = ref[k];
+        fn(k, v);
+      }
+    })();
+    (function() {
+      var filterEntries, stopListening__AnyEvent, stopListening__Base, stopListening__EventMap, stopListening__EventString, stopListening__Everything;
+      filterEntries = function(e, sub, cb) {
+        var k, l, r;
+        if ((l = e.length) < 3) {
+          return;
+        }
+        r = null;
+        k = -1;
+        while ((k += 3) < l) {
+          if ((sub !== e[k - 2]) || (cb && (cb !== e[k - 1] && cb !== e[k - 1]._cb))) {
+            (r || (r = [])).push(e[k - 2], e[k - 1], e[k]);
+          }
+        }
+        return r;
+      };
+      stopListening__Base = function(pub, sub, event, callback) {
+        var entries, filtered, n, pb;
+        n = 0;
+        pb = pub._pb;
+        if (pb && (entries = pb[event])) {
+          filtered = filterEntries(entries, sub, callback);
+          n += entries.length - ((filtered != null ? filtered.length : void 0) | 0);
+          pb[event] = filtered;
+          if (n > 0) {
+            decrementListeningCount(pub, sub, n / 3);
+          }
+        }
+      };
+      stopListening__Everything = function(object) {
+        var entries, event, filtered, n, oid, pair, pb, pub, ref;
+        ref = object._pbTo;
+        for (oid in ref) {
+          pair = ref[oid];
+          pub = pair[0];
+          pb = pub._pb;
+          n = 0;
+          for (event in pb) {
+            entries = pb[event];
+            if (!(entries)) {
+              continue;
+            }
+            filtered = filterEntries(entries, object);
+            n += entries.length - ((filtered != null ? filtered.length : void 0) | 0);
+            pb[event] = filtered;
+          }
+          if (n > 0) {
+            decrementListeningCount(pub, object, n / 3);
+          }
+        }
+      };
+      stopListening__EventString = function(pub, sub, events, callback) {
+        var i, j, l, oid, pair, ref;
+        l = events.length;
+        i = -1;
+        j = 0;
+        while (++i <= l) {
+          if (i === l || events[i] === ' ') {
+            if (j > 0) {
+              ref = sub._pbTo;
+              for (oid in ref) {
+                pair = ref[oid];
+                if (!pub || pair[0] === pub) {
+                  stopListening__Base(pair[0], sub, events.slice(i - j, i), callback);
                 }
-                j = 0;
+              }
+              j = 0;
+            }
+          } else {
+            ++j;
+          }
+        }
+      };
+      stopListening__EventMap = function(pub, sub, hash) {
+        var callback, events;
+        for (events in hash) {
+          if (!hasProp.call(hash, events)) continue;
+          callback = hash[events];
+          stopListening__EventString(pub, sub, events, resolveCallback(sub, hash[events]));
+        }
+      };
+      stopListening__AnyEvent = function(pub, sub, callback) {
+        var event, ipub, oid, pair, ref;
+        ref = sub._pbTo;
+        for (oid in ref) {
+          pair = ref[oid];
+          if (!pub || (ipub = pair[0]) === pub) {
+            for (event in ipub._pb) {
+              stopListening__Base(ipub, sub, event, callback);
+            }
+          }
+        }
+      };
+      PB.stopListening = function(object, events, callback) {
+        if (this._pbTo) {
+          if (!object && !events && !callback) {
+            stopListening__Everything(this);
+          } else if (events) {
+            if (typeof events === 'string') {
+              stopListening__EventString(object, this, events, resolveCallback(this, callback));
             } else {
-                ++j;
+              stopListening__EventMap(object, this, events);
+            }
+          } else {
+            stopListening__AnyEvent(object, this, resolveCallback(this, callback));
+          }
+        }
+        return this;
+      };
+    })();
+    (function() {
+      var runCallbacks, triggerEachEvent, triggerEvent;
+      runCallbacks = function(array, args) {
+        var arg1, arg2, arg3, i, len;
+        if (array.length === 0) {
+          return;
+        }
+        i = -1;
+        len = array.length;
+        arg1 = len > 0 && args[0];
+        arg2 = len > 1 && args[1];
+        arg3 = len > 2 && args[2];
+        switch (args.length) {
+          case 0:
+            while ((i += 3) < len) {
+              array[i - 1].call(array[i]);
+            }
+            break;
+          case 1:
+            while ((i += 3) < len) {
+              array[i - 1].call(array[i], arg1);
+            }
+            break;
+          case 2:
+            while ((i += 3) < len) {
+              array[i - 1].call(array[i], arg1, arg2);
+            }
+            break;
+          case 3:
+            while ((i += 3) < len) {
+              array[i - 1].call(array[i], arg1, arg2, arg3);
+            }
+            break;
+          default:
+            while ((i += 3) < len) {
+              array[i - 1].apply(array[i], args);
             }
         }
-
-
-        if (!this._events) return this;
-
-        if (!args) {
-            args = Array(argsLength);
-            for (k = 0; k < argsLength; k++) args[k] = arguments[k + 1];
+      };
+      triggerEvent = function(pb, event, args) {
+        var allList, list;
+        list = pb[event];
+        allList = pb.all;
+        if (list) {
+          if (allList) {
+            allList = allList.slice();
+          }
+          runCallbacks(list, args);
         }
-
-        eventsApi(triggerApi, this._events, name, void 0, args);
+        if (allList) {
+          args.unshift(event);
+          runCallbacks(allList, args);
+          args.shift();
+        }
+      };
+      triggerEachEvent = function(pb, events, args) {
+        var i, j, l;
+        l = events.length;
+        i = -1;
+        j = 0;
+        while (++i <= l) {
+          if (i === l || events[i] === ' ') {
+            if (j > 0) {
+              triggerEvent(pb, events.slice(i - j, i), args);
+              j = 0;
+            }
+          } else {
+            ++j;
+          }
+        }
+      };
+      PB.trigger = PB.notify = function(events) {
+        var args, k, l, pb;
+        if ((pb = this._pb) && (l = arguments.length) > 0) {
+          k = 0;
+          args = new Array(l - 1);
+          while (++k < l) {
+            args[k - 1] = arguments[k];
+          }
+          triggerEachEvent(pb, events, args);
+        }
         return this;
-    };
-
-    // Handles triggering the appropriate event callbacks.
-    var triggerApi = function(objEvents, name, cb, args) {
-        if (objEvents) {
-            var events = objEvents[name];
-            var allEvents = objEvents.all;
-            if (events && allEvents) allEvents = allEvents.slice();
-            if (events) triggerEvents(events, args);
-            if (allEvents) triggerEvents(allEvents, [name].concat(args));
+      };
+    })();
+    (function() {
+      var unbind__AnyEvent, unbind__Base, unbind__EventMap, unbind__EventString, unbind__Everything;
+      unbind__Base = function(object, event, cb, ctx) {
+        var e, k, len, r;
+        if (!(e = object._pb[event])) {
+          return;
         }
-        return objEvents;
-    };
-
-    // A difficult-to-believe, but optimized internal dispatch function for
-    // triggering events. Tries to keep the usual cases speedy (most internal
-    // Backbone events have 3 arguments).
-    var triggerEvents = function(events, args) {
-        var ev, i = -1, l = events.length, a1 = args[0], a2 = args[1], a3 = args[2];
-        switch (args.length) {
-            case 0: while (++i < l) (ev = events[i]).callback.call(ev.ctx); return;
-            case 1: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1); return;
-            case 2: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1, a2); return;
-            case 3: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1, a2, a3); return;
-            default: while (++i < l) (ev = events[i]).callback.apply(ev.ctx, args); return;
+        if ((len = e.length) < 3) {
+          return;
         }
-    };
-
-    // Aliases for backwards compatibility.
-    Events.bind   = Events.on;
-    Events.unbind = Events.off;
-    Events.notify = Events.trigger;
-
-    var PublisherSubscriber = {};
-    PublisherSubscriber.InstanceMembers = Events;
-
-    PublisherSubscriber.ClassMembers = {
-        isNoisy: function(options) {
-            // null, undefined => true
-            // true            => true
-            // false           => false
-            // {}              => true
-            // {silent: *}     => !silent
-            return options !== false && (options && options.silent) !== true;
-        },
-
-        isEventable: function(obj) {
-            return obj && obj.on === Events.on;
+        r = null;
+        k = -1;
+        while ((k += 3) < len) {
+          if ((!cb || (cb === e[k - 1] || cb === e[k - 1]._cb)) && (!ctx || ctx === e[k])) {
+            if (e[k - 2]) {
+              decrementListeningCount(object, e[k - 2]);
+            }
+          } else {
+            (r || (r = [])).push(e[k - 2], e[k - 1], e[k]);
+          }
         }
+        object._pb[event] = r;
+      };
+      unbind__EventString = function(object, events, callback, context) {
+        var i, j, l;
+        l = events.length;
+        i = -1;
+        j = 0;
+        while (++i <= l) {
+          if (i === l || events[i] === ' ') {
+            if (j > 0) {
+              unbind__Base(object, events.slice(i - j, i), callback, context);
+              j = 0;
+            }
+          } else {
+            ++j;
+          }
+        }
+      };
+      unbind__EventMap = function(object, hash, context) {
+        var events;
+        for (events in hash) {
+          unbind__EventString(object, events, resolveCallback(object, hash[events]), context);
+        }
+      };
+      unbind__Everything = function(object) {
+        var entries, event, len1, m, ref, sub;
+        ref = object._pb;
+        for (event in ref) {
+          entries = ref[event];
+          for (m = 0, len1 = entries.length; m < len1; m += 3) {
+            sub = entries[m];
+            if (sub) {
+              decrementListeningCount(object, sub);
+            }
+          }
+        }
+        object._pb = null;
+      };
+      unbind__AnyEvent = function(object, callback, context) {
+        var event;
+        for (event in object._pb) {
+          unbind__Base(object, event, callback, context);
+        }
+      };
+      PB.unbind = PB.off = function(events, callback, context) {
+        if (this._pb) {
+          if (!events && !callback && !context) {
+            unbind__Everything(this);
+          } else if (events) {
+            if (typeof events === 'string') {
+              unbind__EventString(this, events, resolveCallback(this, callback), context);
+            } else {
+              unbind__EventMap(this, events, context || callback);
+            }
+          } else {
+            unbind__AnyEvent(this, callback, context);
+          }
+        }
+        return this;
+      };
+    })();
+    return {
+      InstanceMembers: PB,
+      ClassMembers: {
+        isNoisy: isNoisy,
+        isEventable: isEventable
+      }
     };
+  });
 
-    return PublisherSubscriber;
-});
+}).call(this);
