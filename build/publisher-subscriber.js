@@ -430,10 +430,12 @@
         ref = object._pb;
         for (event in ref) {
           entries = ref[event];
-          for (m = 0, len1 = entries.length; m < len1; m += 3) {
-            sub = entries[m];
-            if (sub) {
-              decrementListeningCount(object, sub);
+          if (entries) {
+            for (m = 0, len1 = entries.length; m < len1; m += 3) {
+              sub = entries[m];
+              if (sub) {
+                decrementListeningCount(object, sub);
+              }
             }
           }
         }

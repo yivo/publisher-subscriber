@@ -327,7 +327,7 @@
       return
   
     unbind__Everything = (object) ->
-      for event, entries of object._pb
+      for event, entries of object._pb when entries
         for sub in entries by 3 when sub
           decrementListeningCount(object, sub)
       object._pb = null
