@@ -25,22 +25,10 @@ decrementListeningCount = (pub, sub, n) ->
   return
 
 fastProperty = (prop) ->
-  prop
-#  l = prop.length
-#  i = -1
-#  j = 0
-#  ret = ''
-#  while ++i <= l
-#    if i is l or prop[i] is ':'
-#      if j > 0
-#        ret = if ret
-#          "#{ret}_#{prop[i - j...i]}"
-#        else
-#          prop[i - j...i]
-#
-#        j = 0
-#    else ++j
-#  ret
+  if prop.indexOf(':') > -1
+    prop.replace(/:/g, '_')
+  else
+    prop
 
 isNoisy = (options) ->
   # null, undefined => true

@@ -12,7 +12,7 @@ do ->
 
   listenTo__Base = (pub, sub, event, callback, once) ->
     cb = if once then onceWrap(pub, sub, event, callback) else callback
-    ((pub._pb ||= {})[event] ||= []).push(sub, cb, sub)
+    ((pub._pb ||= {})[fastProperty(event)] ||= []).push(sub, cb, sub)
     increaseListeningCount(pub, sub)
     return
 

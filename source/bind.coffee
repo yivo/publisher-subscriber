@@ -12,7 +12,7 @@ do ->
 
   bind__Base = (object, event, callback, context, once) ->
     cb = if once then onceWrap(object, event, callback, context) else callback
-    ((object._pb ||= {})[event] ||= []).push(undefined, cb, context)
+    ((object._pb ||= {})[fastProperty(event)] ||= []).push(undefined, cb, context)
 
   bind__EventString = (object, events, callback, context, once) ->
     l = events.length

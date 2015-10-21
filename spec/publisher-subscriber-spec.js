@@ -588,11 +588,12 @@ describe('PublisherSubscriber', function() {
     });
 
     it("`once` on `all` should work as expected", function() {
-        PublisherSubscriber.InstanceMembers.once('all', function() {
+        var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
+        obj.once('all', function() {
             expect(true).toBeTruthy();
-            PublisherSubscriber.InstanceMembers.trigger('all');
+            obj.trigger('all');
         });
-        PublisherSubscriber.InstanceMembers.trigger('all');
+        obj.trigger('all');
     });
 
     it("once without a callback is a noop", function() {
@@ -688,6 +689,33 @@ describe('PublisherSubscriber', function() {
         obj.listenToOnce(obj, 'event', 'fn');
         obj.trigger('event');
         obj.trigger('event');
+        expect(counter).toBe(1);
+        counter = 0;
+    });
+
+    it("Fast properties", function() {
+        var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
+        var counter = 0;
+        obj.fn = function() { counter++; };
+
+        obj.listenTo(obj, 'namespace:event', 'fn');
+        expect(_.keys(obj._pb)[0]).toBe('namespace_event');
+        obj.trigger('namespace:event');
+        expect(counter).toEqual(1);
+        obj.stopListening(obj, 'namespace:event', 'fn');
+        counter = 0;
+
+        obj.listenTo(obj, {'namespace:event': 'fn'});
+        expect(_.keys(obj._pb)[0]).toBe('namespace_event');
+        obj.trigger('namespace:event');
+        expect(counter).toEqual(1);
+        obj.stopListening(obj, {'namespace:event': 'fn'});
+        counter = 0;
+
+        obj.listenToOnce(obj, 'namespace:event', 'fn');
+        expect(_.keys(obj._pb)[0]).toBe('namespace_event');
+        obj.trigger('namespace:event');
+        obj.trigger('namespace:event');
         expect(counter).toBe(1);
         counter = 0;
     });

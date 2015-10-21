@@ -1,6 +1,7 @@
 do ->
   unbind__Base = (object, event, cb, ctx) ->
-    return if not e = object._pb[event]
+    fevent = fastProperty(event)
+    return if not e = object._pb[fevent]
     return if (len = e.length) < 3
 
     r = null
@@ -15,7 +16,7 @@ do ->
       else
         (r ||= []).push(e[k-2], e[k-1], e[k])
 
-    object._pb[event] = r
+    object._pb[fevent] = r
     return
 
   unbind__EventString = (object, events, callback, context) ->

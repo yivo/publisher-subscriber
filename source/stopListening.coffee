@@ -11,13 +11,14 @@ do ->
     r
 
   stopListening__Base = (pub, sub, event, callback) ->
-    n   = 0
-    pb  = pub._pb
+    n       = 0
+    pb      = pub._pb
+    fevent  = fastProperty(event)
 
-    if pb and (entries = pb[event])
+    if pb and (entries = pb[fevent])
       filtered = filterEntries(entries, sub, callback)
       n += entries.length - (filtered?.length | 0)
-      pb[event] = filtered
+      pb[fevent] = filtered
       decrementListeningCount(pub, sub, n / 3) if n > 0
     return
 

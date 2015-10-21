@@ -37,22 +37,10 @@
     return
   
   fastProperty = (prop) ->
-    prop
-  #  l = prop.length
-  #  i = -1
-  #  j = 0
-  #  ret = ''
-  #  while ++i <= l
-  #    if i is l or prop[i] is ':'
-  #      if j > 0
-  #        ret = if ret
-  #          "#{ret}_#{prop[i - j...i]}"
-  #        else
-  #          prop[i - j...i]
-  #
-  #        j = 0
-  #    else ++j
-  #  ret
+    if prop.indexOf(':') > -1
+      prop.replace(/:/g, '_')
+    else
+      prop
   
   isNoisy = (options) ->
     # null, undefined => true
@@ -78,7 +66,7 @@
   
     bind__Base = (object, event, callback, context, once) ->
       cb = if once then onceWrap(object, event, callback, context) else callback
-      ((object._pb ||= {})[event] ||= []).push(undefined, cb, context)
+      ((object._pb ||= {})[fastProperty(event)] ||= []).push(undefined, cb, context)
   
     bind__EventString = (object, events, callback, context, once) ->
       l = events.length
@@ -127,7 +115,7 @@
   
     listenTo__Base = (pub, sub, event, callback, once) ->
       cb = if once then onceWrap(pub, sub, event, callback) else callback
-      ((pub._pb ||= {})[event] ||= []).push(sub, cb, sub)
+      ((pub._pb ||= {})[fastProperty(event)] ||= []).push(sub, cb, sub)
       increaseListeningCount(pub, sub)
       return
   
@@ -175,13 +163,14 @@
       r
   
     stopListening__Base = (pub, sub, event, callback) ->
-      n   = 0
-      pb  = pub._pb
+      n       = 0
+      pb      = pub._pb
+      fevent  = fastProperty(event)
   
-      if pb and (entries = pb[event])
+      if pb and (entries = pb[fevent])
         filtered = filterEntries(entries, sub, callback)
         n += entries.length - (filtered?.length | 0)
-        pb[event] = filtered
+        pb[fevent] = filtered
         decrementListeningCount(pub, sub, n / 3) if n > 0
       return
   
@@ -256,7 +245,7 @@
       return
   
     triggerEvent = (pb, event, args) ->
-      list    = pb[event]
+      list    = pb[fastProperty(event)]
       allList = pb.all
   
       if list
@@ -287,7 +276,7 @@
         # If space-separated events
         # or there entries for [event]
         # or there entries for `all` event
-        if events.indexOf(' ') > -1 or pb[events] or pb.all
+        if events.indexOf(' ') > -1 or pb[fastProperty(events)] or pb.all
           k           = 0
           args        = new Array(l - 1)
           args[k - 1] = arguments[k] while ++k < l
@@ -296,7 +285,8 @@
     return
   do ->
     unbind__Base = (object, event, cb, ctx) ->
-      return if not e = object._pb[event]
+      fevent = fastProperty(event)
+      return if not e = object._pb[fevent]
       return if (len = e.length) < 3
   
       r = null
@@ -311,7 +301,7 @@
         else
           (r ||= []).push(e[k-2], e[k-1], e[k])
   
-      object._pb[event] = r
+      object._pb[fevent] = r
       return
   
     unbind__EventString = (object, events, callback, context) ->

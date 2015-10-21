@@ -47,7 +47,11 @@
       }
     };
     fastProperty = function(prop) {
-      return prop;
+      if (prop.indexOf(':') > -1) {
+        return prop.replace(/:/g, '_');
+      } else {
+        return prop;
+      }
     };
     isNoisy = function(options) {
       return options !== false && (options && options.silent) !== true;
@@ -71,9 +75,9 @@
         return wrapper;
       };
       bind__Base = function(object, event, callback, context, once) {
-        var base, cb;
+        var base, cb, name;
         cb = once ? onceWrap(object, event, callback, context) : callback;
-        return ((base = (object._pb || (object._pb = {})))[event] || (base[event] = [])).push(void 0, cb, context);
+        return ((base = (object._pb || (object._pb = {})))[name = fastProperty(event)] || (base[name] = [])).push(void 0, cb, context);
       };
       bind__EventString = function(object, events, callback, context, once) {
         var i, j, l;
@@ -137,9 +141,9 @@
         return wrapper;
       };
       listenTo__Base = function(pub, sub, event, callback, once) {
-        var base, cb;
+        var base, cb, name;
         cb = once ? onceWrap(pub, sub, event, callback) : callback;
-        ((base = (pub._pb || (pub._pb = {})))[event] || (base[event] = [])).push(sub, cb, sub);
+        ((base = (pub._pb || (pub._pb = {})))[name = fastProperty(event)] || (base[name] = [])).push(sub, cb, sub);
         increaseListeningCount(pub, sub);
       };
       listenTo__EventString = function(pub, sub, events, callback, once) {
@@ -203,13 +207,14 @@
         return r;
       };
       stopListening__Base = function(pub, sub, event, callback) {
-        var entries, filtered, n, pb;
+        var entries, fevent, filtered, n, pb;
         n = 0;
         pb = pub._pb;
-        if (pb && (entries = pb[event])) {
+        fevent = fastProperty(event);
+        if (pb && (entries = pb[fevent])) {
           filtered = filterEntries(entries, sub, callback);
           n += entries.length - ((filtered != null ? filtered.length : void 0) | 0);
-          pb[event] = filtered;
+          pb[fevent] = filtered;
           if (n > 0) {
             decrementListeningCount(pub, sub, n / 3);
           }
@@ -337,7 +342,7 @@
       };
       triggerEvent = function(pb, event, args) {
         var allList, list;
-        list = pb[event];
+        list = pb[fastProperty(event)];
         allList = pb.all;
         if (list) {
           if (allList) {
@@ -370,7 +375,7 @@
       PB.trigger = PB.notify = function(events) {
         var args, k, l, pb;
         if ((pb = this._pb) && (l = arguments.length) > 0) {
-          if (events.indexOf(' ') > -1 || pb[events] || pb.all) {
+          if (events.indexOf(' ') > -1 || pb[fastProperty(events)] || pb.all) {
             k = 0;
             args = new Array(l - 1);
             while (++k < l) {
@@ -385,8 +390,9 @@
     (function() {
       var unbind__AnyEvent, unbind__Base, unbind__EventMap, unbind__EventString, unbind__Everything;
       unbind__Base = function(object, event, cb, ctx) {
-        var e, k, len, r;
-        if (!(e = object._pb[event])) {
+        var e, fevent, k, len, r;
+        fevent = fastProperty(event);
+        if (!(e = object._pb[fevent])) {
           return;
         }
         if ((len = e.length) < 3) {
@@ -403,7 +409,7 @@
             (r || (r = [])).push(e[k - 2], e[k - 1], e[k]);
           }
         }
-        object._pb[event] = r;
+        object._pb[fevent] = r;
       };
       unbind__EventString = function(object, events, callback, context) {
         var i, j, l;
