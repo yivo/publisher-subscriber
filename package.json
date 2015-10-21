@@ -1,6 +1,6 @@
 {
   "name": "publisher-subscriber",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Publisher-subscriber pattern",
   "main": "build/publisher-subscriber.js",
   "scripts": {
