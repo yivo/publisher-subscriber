@@ -15,6 +15,7 @@
   })(this, function(__root__) {
     var PB, decrementListeningCount, fastProperty, generateOID, getOID, increaseListeningCount, isEventable, isNoisy, resolveCallback;
     PB = {};
+    PB.VERSION = '1.0.0';
     generateOID = (function() {
       var counter;
       counter = 0;

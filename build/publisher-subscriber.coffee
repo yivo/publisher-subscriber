@@ -9,6 +9,7 @@
   return
 )(this, (__root__) ->
   PB = {}
+  PB.VERSION = '1.0.0'
   
   generateOID =  do ->
     counter = 0

@@ -1,4 +1,5 @@
 PB = {}
+PB.VERSION = '1.0.0'
 
 # @include utils.coffee
 # @include bind.coffee
