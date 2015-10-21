@@ -43,9 +43,14 @@ do ->
 
   PB.trigger = PB.notify = (events) ->
     if (pb = @_pb) and (l = arguments.length) > 0
-      k           = 0
-      args        = new Array(l - 1)
-      args[k - 1] = arguments[k] while ++k < l
-      triggerEachEvent(pb, events, args)
+
+      # If space-separated events
+      # or there entries for [event]
+      # or there entries for `all` event
+      if events.indexOf(' ') > -1 or pb[events] or pb.all
+        k           = 0
+        args        = new Array(l - 1)
+        args[k - 1] = arguments[k] while ++k < l
+        triggerEachEvent(pb, events, args)
     this
   return

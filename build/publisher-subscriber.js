@@ -370,12 +370,14 @@
       PB.trigger = PB.notify = function(events) {
         var args, k, l, pb;
         if ((pb = this._pb) && (l = arguments.length) > 0) {
-          k = 0;
-          args = new Array(l - 1);
-          while (++k < l) {
-            args[k - 1] = arguments[k];
+          if (events.indexOf(' ') > -1 || pb[events] || pb.all) {
+            k = 0;
+            args = new Array(l - 1);
+            while (++k < l) {
+              args[k - 1] = arguments[k];
+            }
+            triggerEachEvent(pb, events, args);
           }
-          triggerEachEvent(pb, events, args);
         }
         return this;
       };
