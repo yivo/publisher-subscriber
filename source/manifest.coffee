@@ -1,5 +1,4 @@
 PB = {}
-PB.VERSION = '1.0.0'
 
 # @include utils.coffee
 # @include bind.coffee
@@ -8,5 +7,6 @@ PB.VERSION = '1.0.0'
 # @include notify.coffee
 # @include unbind.coffee
 
+VERSION: '1.0.0'
 InstanceMembers: PB
 ClassMembers: {isNoisy, isEventable}

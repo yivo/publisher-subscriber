@@ -9,7 +9,6 @@
   return
 )(this, (__root__) ->
   PB = {}
-  PB.VERSION = '1.0.0'
   
   generateOID =  do ->
     counter = 0
@@ -350,6 +349,7 @@
       this
     return
   
+  VERSION: '1.0.0'
   InstanceMembers: PB
   ClassMembers: {isNoisy, isEventable}
 )
