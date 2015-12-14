@@ -12,7 +12,7 @@ do ->
 
   listenTo__Base = (pub, sub, event, callback, once) ->
     cb = if once then onceWrap(pub, sub, event, callback) else callback
-    ((pub._pb ||= {})[fastProperty(event)] ||= []).push(sub, cb, sub)
+    ((pub._ps ||= {})[fastProperty(event)] ||= []).push(sub, cb, sub)
     increaseListeningCount(pub, sub)
     return
 
@@ -36,7 +36,7 @@ do ->
   for own k, v of { listenTo: false, listenToOnce: true }
     do (method = k, once = v) ->
 
-      PB[method] = (object, events, callback) ->
+      PS[method] = (object, events, callback) ->
         if typeof events is 'string'
 
           if callback # Added here for spec: "listenTo with empty callback doesn't throw an error"

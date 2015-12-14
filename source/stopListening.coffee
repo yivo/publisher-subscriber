@@ -12,25 +12,25 @@ do ->
 
   stopListening__Base = (pub, sub, event, callback) ->
     n       = 0
-    pb      = pub._pb
+    ps      = pub._ps
     fevent  = fastProperty(event)
 
-    if pb and (entries = pb[fevent])
+    if ps and (entries = ps[fevent])
       filtered = filterEntries(entries, sub, callback)
       n += entries.length - (filtered?.length | 0)
-      pb[fevent] = filtered
+      ps[fevent] = filtered
       decrementListeningCount(pub, sub, n / 3) if n > 0
     return
 
   stopListening__Everything = (object) ->
-    for oid, pair of object._pbTo
+    for oid, pair of object._psTo
       pub   = pair[0]
-      pb    = pub._pb
+      ps    = pub._ps
       n     = 0
-      for event, entries of pb when entries
+      for event, entries of ps when entries
         filtered = filterEntries(entries, object)
         n += entries.length - (filtered?.length | 0)
-        pb[event] = filtered
+        ps[event] = filtered
       decrementListeningCount(pub, object, n / 3) if n > 0
     return
 
@@ -41,7 +41,7 @@ do ->
     while ++i <= l
       if i is l or events[i] is ' '
         if j > 0
-          for oid, pair of sub._pbTo when !pub or pair[0] is pub
+          for oid, pair of sub._psTo when !pub or pair[0] is pub
             stopListening__Base(pair[0], sub, events[i - j...i], callback)
           j = 0
       else ++j
@@ -53,13 +53,13 @@ do ->
     return
 
   stopListening__AnyEvent = (pub, sub, callback) ->
-    for oid, pair of sub._pbTo when !pub or (ipub = pair[0]) is pub
-      for event of ipub._pb
+    for oid, pair of sub._psTo when !pub or (ipub = pair[0]) is pub
+      for event of ipub._ps
         stopListening__Base(ipub, sub, event, callback)
     return
 
-  PB.stopListening = (object, events, callback) ->
-    if @_pbTo
+  PS.stopListening = (object, events, callback) ->
+    if @_psTo
       if !object and !events and !callback
         stopListening__Everything(this)
 

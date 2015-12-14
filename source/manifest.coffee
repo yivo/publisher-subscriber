@@ -1,4 +1,4 @@
-PB = {}
+PS = {}
 
 # @include utils.coffee
 # @include bind.coffee
@@ -8,5 +8,5 @@ PB = {}
 # @include unbind.coffee
 
 VERSION: '1.0.1'
-InstanceMembers: PB
+InstanceMembers: PS
 ClassMembers: {isNoisy, isEventable}

@@ -1,14 +1,23 @@
 ((root, factory) ->
+
+  # AMD
   if typeof define is 'function' and define.amd
     root.PublisherSubscriber = factory(root)
     define -> root.PublisherSubscriber
+
+  # CommonJS
   else if typeof module is 'object' && typeof module.exports is 'object'
     module.exports = factory(root)
+
+  # Browser and the rest
   else
     root.PublisherSubscriber = factory(root)
+
+  # No return value
   return
+
 )(this, (__root__) ->
-  PB = {}
+  PS = {}
   
   generateOID =  do ->
     counter = 0
@@ -24,16 +33,16 @@
       callback
   
   increaseListeningCount = (pub, sub, n) ->
-    listening = (sub._pbTo ||= {})
+    listening = (sub._psTo ||= {})
     record    = (listening[getOID(pub)] ||= [pub, 0])
     record[1] += n || 1
     return
   
   decrementListeningCount = (pub, sub, n) ->
     oid       = getOID(pub)
-    record    = sub._pbTo[oid]
+    record    = sub._psTo[oid]
     if record and (record[1] -= n || 1) < 1
-      delete sub._pbTo[oid]
+      delete sub._psTo[oid]
     return
   
   fastProperty = (prop) ->
@@ -51,7 +60,8 @@
     options != false && (options && options.silent) != true
   
   isEventable = (obj) ->
-    obj && obj.on == PB.on
+    obj && obj.on == PS.on
+  
   do ->
     onceWrap = (pub, event, callback, context) ->
       run     = false
@@ -66,7 +76,7 @@
   
     bind__Base = (object, event, callback, context, once) ->
       cb = if once then onceWrap(object, event, callback, context) else callback
-      ((object._pb ||= {})[fastProperty(event)] ||= []).push(undefined, cb, context)
+      ((object._ps ||= {})[fastProperty(event)] ||= []).push(undefined, cb, context)
   
     bind__EventString = (object, events, callback, context, once) ->
       l = events.length
@@ -88,7 +98,7 @@
     for own k, v of { bind: false, bindOnce: true }
       do (method = k, once = v) ->
   
-        PB[method] = (events, callback, context) ->
+        PS[method] = (events, callback, context) ->
           if typeof events is 'string'
   
             if callback # Added here for spec: "if no callback is provided, `on` is a noop"
@@ -98,9 +108,10 @@
             bind__EventMap(this, events, context or callback or this, once)
           this
   
-    PB.on   = PB.bind
-    PB.once = PB.bindOnce
+    PS.on   = PS.bind
+    PS.once = PS.bindOnce
     return
+  
   do ->
     onceWrap = (pub, sub, event, callback) ->
       run     = false
@@ -115,7 +126,7 @@
   
     listenTo__Base = (pub, sub, event, callback, once) ->
       cb = if once then onceWrap(pub, sub, event, callback) else callback
-      ((pub._pb ||= {})[fastProperty(event)] ||= []).push(sub, cb, sub)
+      ((pub._ps ||= {})[fastProperty(event)] ||= []).push(sub, cb, sub)
       increaseListeningCount(pub, sub)
       return
   
@@ -139,7 +150,7 @@
     for own k, v of { listenTo: false, listenToOnce: true }
       do (method = k, once = v) ->
   
-        PB[method] = (object, events, callback) ->
+        PS[method] = (object, events, callback) ->
           if typeof events is 'string'
   
             if callback # Added here for spec: "listenTo with empty callback doesn't throw an error"
@@ -150,6 +161,7 @@
           this
   
     return
+  
   do ->
     filterEntries = (e, sub, cb) ->
       return if (l = e.length) < 3
@@ -164,25 +176,25 @@
   
     stopListening__Base = (pub, sub, event, callback) ->
       n       = 0
-      pb      = pub._pb
+      ps      = pub._ps
       fevent  = fastProperty(event)
   
-      if pb and (entries = pb[fevent])
+      if ps and (entries = ps[fevent])
         filtered = filterEntries(entries, sub, callback)
         n += entries.length - (filtered?.length | 0)
-        pb[fevent] = filtered
+        ps[fevent] = filtered
         decrementListeningCount(pub, sub, n / 3) if n > 0
       return
   
     stopListening__Everything = (object) ->
-      for oid, pair of object._pbTo
+      for oid, pair of object._psTo
         pub   = pair[0]
-        pb    = pub._pb
+        ps    = pub._ps
         n     = 0
-        for event, entries of pb when entries
+        for event, entries of ps when entries
           filtered = filterEntries(entries, object)
           n += entries.length - (filtered?.length | 0)
-          pb[event] = filtered
+          ps[event] = filtered
         decrementListeningCount(pub, object, n / 3) if n > 0
       return
   
@@ -193,7 +205,7 @@
       while ++i <= l
         if i is l or events[i] is ' '
           if j > 0
-            for oid, pair of sub._pbTo when !pub or pair[0] is pub
+            for oid, pair of sub._psTo when !pub or pair[0] is pub
               stopListening__Base(pair[0], sub, events[i - j...i], callback)
             j = 0
         else ++j
@@ -205,13 +217,13 @@
       return
   
     stopListening__AnyEvent = (pub, sub, callback) ->
-      for oid, pair of sub._pbTo when !pub or (ipub = pair[0]) is pub
-        for event of ipub._pb
+      for oid, pair of sub._psTo when !pub or (ipub = pair[0]) is pub
+        for event of ipub._ps
           stopListening__Base(ipub, sub, event, callback)
       return
   
-    PB.stopListening = (object, events, callback) ->
-      if @_pbTo
+    PS.stopListening = (object, events, callback) ->
+      if @_psTo
         if !object and !events and !callback
           stopListening__Everything(this)
   
@@ -227,6 +239,7 @@
       this
   
     return
+  
   do ->
     runCallbacks = (array, args) ->
       return if array.length is 0
@@ -244,9 +257,9 @@
         else        array[i - 1].apply(array[i], args)              while (i += 3) < len
       return
   
-    triggerEvent = (pb, event, args) ->
-      list    = pb[fastProperty(event)]
-      allList = pb.all
+    triggerEvent = (ps, event, args) ->
+      list    = ps[fastProperty(event)]
+      allList = ps.all
   
       if list
         allList = allList.slice() if allList
@@ -258,35 +271,36 @@
         args.shift()
       return
   
-    triggerEachEvent = (pb, events, args) ->
+    triggerEachEvent = (ps, events, args) ->
       l = events.length
       i = -1
       j = 0
       while ++i <= l
         if i is l or events[i] is ' '
           if j > 0
-            triggerEvent(pb, events[i - j...i], args)
+            triggerEvent(ps, events[i - j...i], args)
             j = 0
         else ++j
       return
   
-    PB.trigger = PB.notify = (events) ->
-      if (pb = @_pb) and (l = arguments.length) > 0
+    PS.trigger = PS.notify = (events) ->
+      if (ps = @_ps) and (l = arguments.length) > 0
   
         # If space-separated events
         # or there entries for [event]
         # or there entries for `all` event
-        if events.indexOf(' ') > -1 or pb[fastProperty(events)] or pb.all
+        if events.indexOf(' ') > -1 or ps[fastProperty(events)] or ps.all
           k           = 0
           args        = new Array(l - 1)
           args[k - 1] = arguments[k] while ++k < l
-          triggerEachEvent(pb, events, args)
+          triggerEachEvent(ps, events, args)
       this
     return
+  
   do ->
     unbind__Base = (object, event, cb, ctx) ->
       fevent = fastProperty(event)
-      return if not e = object._pb[fevent]
+      return if not e = object._ps[fevent]
       return if (len = e.length) < 3
   
       r = null
@@ -301,7 +315,7 @@
         else
           (r ||= []).push(e[k-2], e[k-1], e[k])
   
-      object._pb[fevent] = r
+      object._ps[fevent] = r
       return
   
     unbind__EventString = (object, events, callback, context) ->
@@ -322,19 +336,19 @@
       return
   
     unbind__Everything = (object) ->
-      for event, entries of object._pb when entries
+      for event, entries of object._ps when entries
         for sub in entries by 3 when sub
           decrementListeningCount(object, sub)
-      object._pb = null
+      object._ps = null
       return
   
     unbind__AnyEvent = (object, callback, context) ->
-      for event of object._pb
+      for event of object._ps
         unbind__Base(object, event, callback, context)
       return
   
-    PB.unbind = PB.off = (events, callback, context) ->
-      if @_pb
+    PS.unbind = PS.off = (events, callback, context) ->
+      if @_ps
         if !events and !callback and !context
           unbind__Everything(this)
   
@@ -349,7 +363,9 @@
       this
     return
   
+  
   VERSION: '1.0.1'
-  InstanceMembers: PB
+  InstanceMembers: PS
   ClassMembers: {isNoisy, isEventable}
+  
 )

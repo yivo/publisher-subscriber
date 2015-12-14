@@ -13,8 +13,8 @@
       root.PublisherSubscriber = factory(root);
     }
   })(this, function(__root__) {
-    var PB, decrementListeningCount, fastProperty, generateOID, getOID, increaseListeningCount, isEventable, isNoisy, resolveCallback;
-    PB = {};
+    var PS, decrementListeningCount, fastProperty, generateOID, getOID, increaseListeningCount, isEventable, isNoisy, resolveCallback;
+    PS = {};
     generateOID = (function() {
       var counter;
       counter = 0;
@@ -34,16 +34,16 @@
     };
     increaseListeningCount = function(pub, sub, n) {
       var listening, name, record;
-      listening = (sub._pbTo || (sub._pbTo = {}));
+      listening = (sub._psTo || (sub._psTo = {}));
       record = (listening[name = getOID(pub)] || (listening[name] = [pub, 0]));
       record[1] += n || 1;
     };
     decrementListeningCount = function(pub, sub, n) {
       var oid, record;
       oid = getOID(pub);
-      record = sub._pbTo[oid];
+      record = sub._psTo[oid];
       if (record && (record[1] -= n || 1) < 1) {
-        delete sub._pbTo[oid];
+        delete sub._psTo[oid];
       }
     };
     fastProperty = function(prop) {
@@ -57,7 +57,7 @@
       return options !== false && (options && options.silent) !== true;
     };
     isEventable = function(obj) {
-      return obj && obj.on === PB.on;
+      return obj && obj.on === PS.on;
     };
     (function() {
       var bind__Base, bind__EventMap, bind__EventString, fn, k, onceWrap, ref, v;
@@ -77,7 +77,7 @@
       bind__Base = function(object, event, callback, context, once) {
         var base, cb, name;
         cb = once ? onceWrap(object, event, callback, context) : callback;
-        return ((base = (object._pb || (object._pb = {})))[name = fastProperty(event)] || (base[name] = [])).push(void 0, cb, context);
+        return ((base = (object._ps || (object._ps = {})))[name = fastProperty(event)] || (base[name] = [])).push(void 0, cb, context);
       };
       bind__EventString = function(object, events, callback, context, once) {
         var i, j, l;
@@ -106,7 +106,7 @@
         bindOnce: true
       };
       fn = function(method, once) {
-        return PB[method] = function(events, callback, context) {
+        return PS[method] = function(events, callback, context) {
           if (typeof events === 'string') {
             if (callback) {
               bind__EventString(this, events, resolveCallback(this, callback), context || this, once);
@@ -122,8 +122,8 @@
         v = ref[k];
         fn(k, v);
       }
-      PB.on = PB.bind;
-      PB.once = PB.bindOnce;
+      PS.on = PS.bind;
+      PS.once = PS.bindOnce;
     })();
     (function() {
       var fn, k, listenTo__Base, listenTo__EventMap, listenTo__EventString, onceWrap, ref, v;
@@ -143,7 +143,7 @@
       listenTo__Base = function(pub, sub, event, callback, once) {
         var base, cb, name;
         cb = once ? onceWrap(pub, sub, event, callback) : callback;
-        ((base = (pub._pb || (pub._pb = {})))[name = fastProperty(event)] || (base[name] = [])).push(sub, cb, sub);
+        ((base = (pub._ps || (pub._ps = {})))[name = fastProperty(event)] || (base[name] = [])).push(sub, cb, sub);
         increaseListeningCount(pub, sub);
       };
       listenTo__EventString = function(pub, sub, events, callback, once) {
@@ -173,7 +173,7 @@
         listenToOnce: true
       };
       fn = function(method, once) {
-        return PB[method] = function(object, events, callback) {
+        return PS[method] = function(object, events, callback) {
           if (typeof events === 'string') {
             if (callback) {
               listenTo__EventString(object, this, events, resolveCallback(this, callback), once);
@@ -207,35 +207,35 @@
         return r;
       };
       stopListening__Base = function(pub, sub, event, callback) {
-        var entries, fevent, filtered, n, pb;
+        var entries, fevent, filtered, n, ps;
         n = 0;
-        pb = pub._pb;
+        ps = pub._ps;
         fevent = fastProperty(event);
-        if (pb && (entries = pb[fevent])) {
+        if (ps && (entries = ps[fevent])) {
           filtered = filterEntries(entries, sub, callback);
           n += entries.length - ((filtered != null ? filtered.length : void 0) | 0);
-          pb[fevent] = filtered;
+          ps[fevent] = filtered;
           if (n > 0) {
             decrementListeningCount(pub, sub, n / 3);
           }
         }
       };
       stopListening__Everything = function(object) {
-        var entries, event, filtered, n, oid, pair, pb, pub, ref;
-        ref = object._pbTo;
+        var entries, event, filtered, n, oid, pair, ps, pub, ref;
+        ref = object._psTo;
         for (oid in ref) {
           pair = ref[oid];
           pub = pair[0];
-          pb = pub._pb;
+          ps = pub._ps;
           n = 0;
-          for (event in pb) {
-            entries = pb[event];
+          for (event in ps) {
+            entries = ps[event];
             if (!(entries)) {
               continue;
             }
             filtered = filterEntries(entries, object);
             n += entries.length - ((filtered != null ? filtered.length : void 0) | 0);
-            pb[event] = filtered;
+            ps[event] = filtered;
           }
           if (n > 0) {
             decrementListeningCount(pub, object, n / 3);
@@ -250,7 +250,7 @@
         while (++i <= l) {
           if (i === l || events[i] === ' ') {
             if (j > 0) {
-              ref = sub._pbTo;
+              ref = sub._psTo;
               for (oid in ref) {
                 pair = ref[oid];
                 if (!pub || pair[0] === pub) {
@@ -274,18 +274,18 @@
       };
       stopListening__AnyEvent = function(pub, sub, callback) {
         var event, ipub, oid, pair, ref;
-        ref = sub._pbTo;
+        ref = sub._psTo;
         for (oid in ref) {
           pair = ref[oid];
           if (!pub || (ipub = pair[0]) === pub) {
-            for (event in ipub._pb) {
+            for (event in ipub._ps) {
               stopListening__Base(ipub, sub, event, callback);
             }
           }
         }
       };
-      PB.stopListening = function(object, events, callback) {
-        if (this._pbTo) {
+      PS.stopListening = function(object, events, callback) {
+        if (this._psTo) {
           if (!object && !events && !callback) {
             stopListening__Everything(this);
           } else if (events) {
@@ -340,10 +340,10 @@
             }
         }
       };
-      triggerEvent = function(pb, event, args) {
+      triggerEvent = function(ps, event, args) {
         var allList, list;
-        list = pb[fastProperty(event)];
-        allList = pb.all;
+        list = ps[fastProperty(event)];
+        allList = ps.all;
         if (list) {
           if (allList) {
             allList = allList.slice();
@@ -356,7 +356,7 @@
           args.shift();
         }
       };
-      triggerEachEvent = function(pb, events, args) {
+      triggerEachEvent = function(ps, events, args) {
         var i, j, l;
         l = events.length;
         i = -1;
@@ -364,7 +364,7 @@
         while (++i <= l) {
           if (i === l || events[i] === ' ') {
             if (j > 0) {
-              triggerEvent(pb, events.slice(i - j, i), args);
+              triggerEvent(ps, events.slice(i - j, i), args);
               j = 0;
             }
           } else {
@@ -372,16 +372,16 @@
           }
         }
       };
-      PB.trigger = PB.notify = function(events) {
-        var args, k, l, pb;
-        if ((pb = this._pb) && (l = arguments.length) > 0) {
-          if (events.indexOf(' ') > -1 || pb[fastProperty(events)] || pb.all) {
+      PS.trigger = PS.notify = function(events) {
+        var args, k, l, ps;
+        if ((ps = this._ps) && (l = arguments.length) > 0) {
+          if (events.indexOf(' ') > -1 || ps[fastProperty(events)] || ps.all) {
             k = 0;
             args = new Array(l - 1);
             while (++k < l) {
               args[k - 1] = arguments[k];
             }
-            triggerEachEvent(pb, events, args);
+            triggerEachEvent(ps, events, args);
           }
         }
         return this;
@@ -392,7 +392,7 @@
       unbind__Base = function(object, event, cb, ctx) {
         var e, fevent, k, len, r;
         fevent = fastProperty(event);
-        if (!(e = object._pb[fevent])) {
+        if (!(e = object._ps[fevent])) {
           return;
         }
         if ((len = e.length) < 3) {
@@ -409,7 +409,7 @@
             (r || (r = [])).push(e[k - 2], e[k - 1], e[k]);
           }
         }
-        object._pb[fevent] = r;
+        object._ps[fevent] = r;
       };
       unbind__EventString = function(object, events, callback, context) {
         var i, j, l;
@@ -435,7 +435,7 @@
       };
       unbind__Everything = function(object) {
         var entries, event, len1, m, ref, sub;
-        ref = object._pb;
+        ref = object._ps;
         for (event in ref) {
           entries = ref[event];
           if (entries) {
@@ -447,16 +447,16 @@
             }
           }
         }
-        object._pb = null;
+        object._ps = null;
       };
       unbind__AnyEvent = function(object, callback, context) {
         var event;
-        for (event in object._pb) {
+        for (event in object._ps) {
           unbind__Base(object, event, callback, context);
         }
       };
-      PB.unbind = PB.off = function(events, callback, context) {
-        if (this._pb) {
+      PS.unbind = PS.off = function(events, callback, context) {
+        if (this._ps) {
           if (!events && !callback && !context) {
             unbind__Everything(this);
           } else if (events) {
@@ -474,7 +474,7 @@
     })();
     return {
       VERSION: '1.0.1',
-      InstanceMembers: PB,
+      InstanceMembers: PS,
       ClassMembers: {
         isNoisy: isNoisy,
         isEventable: isEventable

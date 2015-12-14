@@ -12,16 +12,16 @@ resolveCallback = (object, callback) ->
     callback
 
 increaseListeningCount = (pub, sub, n) ->
-  listening = (sub._pbTo ||= {})
+  listening = (sub._psTo ||= {})
   record    = (listening[getOID(pub)] ||= [pub, 0])
   record[1] += n || 1
   return
 
 decrementListeningCount = (pub, sub, n) ->
   oid       = getOID(pub)
-  record    = sub._pbTo[oid]
+  record    = sub._psTo[oid]
   if record and (record[1] -= n || 1) < 1
-    delete sub._pbTo[oid]
+    delete sub._psTo[oid]
   return
 
 fastProperty = (prop) ->
@@ -39,4 +39,4 @@ isNoisy = (options) ->
   options != false && (options && options.silent) != true
 
 isEventable = (obj) ->
-  obj && obj.on == PB.on
+  obj && obj.on == PS.on

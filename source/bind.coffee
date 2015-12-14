@@ -12,7 +12,7 @@ do ->
 
   bind__Base = (object, event, callback, context, once) ->
     cb = if once then onceWrap(object, event, callback, context) else callback
-    ((object._pb ||= {})[fastProperty(event)] ||= []).push(undefined, cb, context)
+    ((object._ps ||= {})[fastProperty(event)] ||= []).push(undefined, cb, context)
 
   bind__EventString = (object, events, callback, context, once) ->
     l = events.length
@@ -34,7 +34,7 @@ do ->
   for own k, v of { bind: false, bindOnce: true }
     do (method = k, once = v) ->
 
-      PB[method] = (events, callback, context) ->
+      PS[method] = (events, callback, context) ->
         if typeof events is 'string'
 
           if callback # Added here for spec: "if no callback is provided, `on` is a noop"
@@ -44,6 +44,6 @@ do ->
           bind__EventMap(this, events, context or callback or this, once)
         this
 
-  PB.on   = PB.bind
-  PB.once = PB.bindOnce
+  PS.on   = PS.bind
+  PS.once = PS.bindOnce
   return

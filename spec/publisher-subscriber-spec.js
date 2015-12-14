@@ -216,20 +216,20 @@ describe('PublisherSubscriber', function() {
         var fn = function() {};
         b.on('event', fn);
         a.listenTo(b, 'event', fn).stopListening();
-        expect(_.size(a._pbTo)).toBe(0);
-        expect(_.size(b._pb.event)).toBe(3);
+        expect(_.size(a._psTo)).toBe(0);
+        expect(_.size(b._ps.event)).toBe(3);
         //expect(_.size(b._listeners)).toBe(0);
         a.listenTo(b, 'event', fn).stopListening(b);
-        expect(_.size(a._pbTo)).toBe(0);
-        expect(_.size(b._pb.event)).toBe(3);
+        expect(_.size(a._psTo)).toBe(0);
+        expect(_.size(b._ps.event)).toBe(3);
         //expect(_.size(b._listeners)).toBe(0);
         a.listenTo(b, 'event', fn).stopListening(b, 'event');
-        expect(_.size(a._pbTo)).toBe(0);
-        expect(_.size(b._pb.event)).toBe(3);
+        expect(_.size(a._psTo)).toBe(0);
+        expect(_.size(b._ps.event)).toBe(3);
         //expect(_.size(b._listeners)).toBe(0);
         a.listenTo(b, 'event', fn).stopListening(b, 'event', fn);
-        expect(_.size(a._pbTo)).toBe(0);
-        expect(_.size(b._pb.event)).toBe(3);
+        expect(_.size(a._psTo)).toBe(0);
+        expect(_.size(b._ps.event)).toBe(3);
         //expect(_.size(b._listeners)).toBe(0);
     });
 
@@ -239,20 +239,20 @@ describe('PublisherSubscriber', function() {
         var fn = function() {};
         b.on('event', fn);
         a.listenToOnce(b, 'event', fn).stopListening();
-        expect(_.size(a._pbTo)).toBe(0);
-        expect(_.size(b._pb.event)).toBe(3);
+        expect(_.size(a._psTo)).toBe(0);
+        expect(_.size(b._ps.event)).toBe(3);
         //expect(_.size(b._listeners)).toBe(0);
         a.listenToOnce(b, 'event', fn).stopListening(b);
-        expect(_.size(a._pbTo)).toBe(0);
-        expect(_.size(b._pb.event)).toBe(3);
+        expect(_.size(a._psTo)).toBe(0);
+        expect(_.size(b._ps.event)).toBe(3);
         //expect(_.size(b._listeners)).toBe(0);
         a.listenToOnce(b, 'event', fn).stopListening(b, 'event');
-        expect(_.size(a._pbTo)).toBe(0);
-        expect(_.size(b._pb.event)).toBe(3);
+        expect(_.size(a._psTo)).toBe(0);
+        expect(_.size(b._ps.event)).toBe(3);
         //expect(_.size(b._listeners)).toBe(0);
         a.listenToOnce(b, 'event', fn).stopListening(b, 'event', fn);
-        expect(_.size(a._pbTo)).toBe(0);
-        expect(_.size(b._pb.event)).toBe(3);
+        expect(_.size(a._psTo)).toBe(0);
+        expect(_.size(b._ps.event)).toBe(3);
         //expect(_.size(b._listeners)).toBe(0);
     });
 
@@ -262,19 +262,19 @@ describe('PublisherSubscriber', function() {
         var fn = function() {};
         a.listenTo(b, 'event', fn);
         b.off();
-        expect(_.size(a._pbTo)).toBe(0);
+        expect(_.size(a._psTo)).toBe(0);
         //expect(_.size(b._listeners)).toBe(0);
         a.listenTo(b, 'event', fn);
         b.off('event');
-        expect(_.size(a._pbTo)).toBe(0);
+        expect(_.size(a._psTo)).toBe(0);
         //expect(_.size(b._listeners)).toBe(0);
         a.listenTo(b, 'event', fn);
         b.off(null, fn);
-        expect(_.size(a._pbTo)).toBe(0);
+        expect(_.size(a._psTo)).toBe(0);
         //expect(_.size(b._listeners)).toBe(0);
         a.listenTo(b, 'event', fn);
         b.off(null, null, a);
-        expect(_.size(a._pbTo)).toBe(0);
+        expect(_.size(a._psTo)).toBe(0);
         //expect(_.size(b._listeners)).toBe(0);
     });
 
@@ -286,7 +286,7 @@ describe('PublisherSubscriber', function() {
         a.listenTo(b, 'other', function(){ expect(true).toBeFalsy(); });
         a.stopListening(b, 'other');
         a.stopListening(b, 'all');
-        expect(_.size(a._pbTo)).toBe(0);
+        expect(_.size(a._psTo)).toBe(0);
     });
 
     it("listenToOnce without context cleans up references after the event has fired", function() {
@@ -294,7 +294,7 @@ describe('PublisherSubscriber', function() {
         var b = _.extend({}, PublisherSubscriber.InstanceMembers);
         a.listenToOnce(b, 'all', function(){ expect(true).toBeTruthy(); });
         b.trigger('anything');
-        expect(_.size(a._pbTo)).toBe(0);
+        expect(_.size(a._psTo)).toBe(0);
     });
 
     it("listenToOnce with event maps cleans up references", function() {
@@ -308,7 +308,7 @@ describe('PublisherSubscriber', function() {
         a.listenToOnce(b, eventMap);
         b.trigger('one');
         expect(eventMap.one.calls.count()).toBe(1);
-        expect(_.size(a._pbTo)).toBe(1);
+        expect(_.size(a._psTo)).toBe(1);
     });
 
     it("listenToOnce with event maps binds the correct `this`", function() {
@@ -699,21 +699,21 @@ describe('PublisherSubscriber', function() {
         obj.fn = function() { counter++; };
 
         obj.listenTo(obj, 'namespace:event', 'fn');
-        expect(_.keys(obj._pb)[0]).toBe('namespace_event');
+        expect(_.keys(obj._ps)[0]).toBe('namespace_event');
         obj.trigger('namespace:event');
         expect(counter).toEqual(1);
         obj.stopListening(obj, 'namespace:event', 'fn');
         counter = 0;
 
         obj.listenTo(obj, {'namespace:event': 'fn'});
-        expect(_.keys(obj._pb)[0]).toBe('namespace_event');
+        expect(_.keys(obj._ps)[0]).toBe('namespace_event');
         obj.trigger('namespace:event');
         expect(counter).toEqual(1);
         obj.stopListening(obj, {'namespace:event': 'fn'});
         counter = 0;
 
         obj.listenToOnce(obj, 'namespace:event', 'fn');
-        expect(_.keys(obj._pb)[0]).toBe('namespace_event');
+        expect(_.keys(obj._ps)[0]).toBe('namespace_event');
         obj.trigger('namespace:event');
         obj.trigger('namespace:event');
         expect(counter).toBe(1);

@@ -15,9 +15,9 @@ do ->
       else        array[i - 1].apply(array[i], args)              while (i += 3) < len
     return
 
-  triggerEvent = (pb, event, args) ->
-    list    = pb[fastProperty(event)]
-    allList = pb.all
+  triggerEvent = (ps, event, args) ->
+    list    = ps[fastProperty(event)]
+    allList = ps.all
 
     if list
       allList = allList.slice() if allList
@@ -29,28 +29,28 @@ do ->
       args.shift()
     return
 
-  triggerEachEvent = (pb, events, args) ->
+  triggerEachEvent = (ps, events, args) ->
     l = events.length
     i = -1
     j = 0
     while ++i <= l
       if i is l or events[i] is ' '
         if j > 0
-          triggerEvent(pb, events[i - j...i], args)
+          triggerEvent(ps, events[i - j...i], args)
           j = 0
       else ++j
     return
 
-  PB.trigger = PB.notify = (events) ->
-    if (pb = @_pb) and (l = arguments.length) > 0
+  PS.trigger = PS.notify = (events) ->
+    if (ps = @_ps) and (l = arguments.length) > 0
 
       # If space-separated events
       # or there entries for [event]
       # or there entries for `all` event
-      if events.indexOf(' ') > -1 or pb[fastProperty(events)] or pb.all
+      if events.indexOf(' ') > -1 or ps[fastProperty(events)] or ps.all
         k           = 0
         args        = new Array(l - 1)
         args[k - 1] = arguments[k] while ++k < l
-        triggerEachEvent(pb, events, args)
+        triggerEachEvent(ps, events, args)
     this
   return
