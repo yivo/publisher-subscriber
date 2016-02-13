@@ -17,7 +17,7 @@ gulp.task 'build', ->
   gulp.src('source/manifest.coffee')
   .pipe plumber()
   .pipe preprocess()
-  .pipe iife {global: 'PublisherSubscriber'}
+  .pipe iife(global: 'PublisherSubscriber', dependencies: [])
   .pipe concat('publisher-subscriber.coffee')
   .pipe ejs({}, {ext: '.coffee'})
   .pipe gulp.dest('build')

@@ -1,4 +1,12 @@
-((root, factory) ->
+((factory) ->
+
+  # Browser and WebWorker
+  root = if typeof self is 'object' and self?.self is self
+    self
+
+  # Server
+  else if typeof global is 'object' and global?.global is global
+    global
 
   # AMD
   if typeof define is 'function' and define.amd
@@ -6,7 +14,8 @@
     define -> root.PublisherSubscriber
 
   # CommonJS
-  else if typeof module is 'object' && typeof module.exports is 'object'
+  else if typeof module is 'object' and module isnt null and
+          module.exports? and typeof module.exports is 'object'
     module.exports = factory(root)
 
   # Browser and the rest
@@ -16,7 +25,7 @@
   # No return value
   return
 
-)(this, (__root__) ->
+)((__root__) ->
   PS = {}
   
   generateOID =  do ->
@@ -47,9 +56,15 @@
   
   fastProperty = (prop) ->
     if prop.indexOf(':') > -1
+  
+      # http://stackoverflow.com/questions/14352100/does-v8-cache-compiled-regular-expressions-automatically
       prop.replace(/:/g, '_')
     else
       prop
+  
+  # TODO Event list binding
+  isArrayLike = (obj) ->
+    obj? and typeof obj.length is 'number'
   
   isNoisy = (options) ->
     # null, undefined => true
@@ -88,6 +103,12 @@
             bind__Base(object, events[i - j...i], callback, context, once)
             j = 0
         else ++j
+      return
+  
+    # TODO Event list binding
+    bind__EventList = (object, events, callback, context, once) ->
+      for event in events
+        bind__Base(object, event, callback, context, once)
       return
   
     bind__EventMap = (object, hash, context, once) ->

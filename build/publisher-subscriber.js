@@ -1,19 +1,21 @@
 (function() {
   var hasProp = {}.hasOwnProperty;
 
-  (function(root, factory) {
+  (function(factory) {
+    var root;
+    root = typeof self === 'object' && (typeof self !== "undefined" && self !== null ? self.self : void 0) === self ? self : typeof global === 'object' && (typeof global !== "undefined" && global !== null ? global.global : void 0) === global ? global : void 0;
     if (typeof define === 'function' && define.amd) {
       root.PublisherSubscriber = factory(root);
       define(function() {
         return root.PublisherSubscriber;
       });
-    } else if (typeof module === 'object' && typeof module.exports === 'object') {
+    } else if (typeof module === 'object' && module !== null && (module.exports != null) && typeof module.exports === 'object') {
       module.exports = factory(root);
     } else {
       root.PublisherSubscriber = factory(root);
     }
-  })(this, function(__root__) {
-    var PS, decrementListeningCount, fastProperty, generateOID, getOID, increaseListeningCount, isEventable, isNoisy, resolveCallback;
+  })(function(__root__) {
+    var PS, decrementListeningCount, fastProperty, generateOID, getOID, increaseListeningCount, isArrayLike, isEventable, isNoisy, resolveCallback;
     PS = {};
     generateOID = (function() {
       var counter;
@@ -53,6 +55,9 @@
         return prop;
       }
     };
+    isArrayLike = function(obj) {
+      return (obj != null) && typeof obj.length === 'number';
+    };
     isNoisy = function(options) {
       return options !== false && (options && options.silent) !== true;
     };
@@ -60,7 +65,7 @@
       return obj && obj.on === PS.on;
     };
     (function() {
-      var bind__Base, bind__EventMap, bind__EventString, fn, k, onceWrap, ref, v;
+      var bind__Base, bind__EventList, bind__EventMap, bind__EventString, fn, k, onceWrap, ref, v;
       onceWrap = function(pub, event, callback, context) {
         var run, wrapper;
         run = false;
@@ -93,6 +98,13 @@
           } else {
             ++j;
           }
+        }
+      };
+      bind__EventList = function(object, events, callback, context, once) {
+        var event, len1, m;
+        for (m = 0, len1 = events.length; m < len1; m++) {
+          event = events[m];
+          bind__Base(object, event, callback, context, once);
         }
       };
       bind__EventMap = function(object, hash, context, once) {
