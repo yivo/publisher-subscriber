@@ -385,8 +385,11 @@
     return
   
   
-  VERSION: '1.0.1'
+  VERSION:         '1.0.3'
+  isNoisy:         isNoisy
+  isEventable:     isEventable
   InstanceMembers: PS
-  ClassMembers: {isNoisy, isEventable}
+  included:        (Class) ->
+                     Class.initializer? -> @_ps = {}; @_psTo = {}; return
   
 )

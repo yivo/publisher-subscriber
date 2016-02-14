@@ -14,7 +14,7 @@ require('gulp-lazyload')
 gulp.task 'default', ['build', 'watch'], ->
 
 gulp.task 'build', ->
-  gulp.src('source/manifest.coffee')
+  gulp.src('source/__manifest__.coffee')
   .pipe plumber()
   .pipe preprocess()
   .pipe iife(global: 'PublisherSubscriber', dependencies: [])

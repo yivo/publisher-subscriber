@@ -485,11 +485,15 @@
       };
     })();
     return {
-      VERSION: '1.0.1',
+      VERSION: '1.0.3',
+      isNoisy: isNoisy,
+      isEventable: isEventable,
       InstanceMembers: PS,
-      ClassMembers: {
-        isNoisy: isNoisy,
-        isEventable: isEventable
+      included: function(Class) {
+        return typeof Class.initializer === "function" ? Class.initializer(function() {
+          this._ps = {};
+          this._psTo = {};
+        }) : void 0;
       }
     };
   });
