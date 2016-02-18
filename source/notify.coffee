@@ -49,8 +49,8 @@ do ->
       # or there entries for `all` event
       if space = (events.indexOf(' ') > -1) or ps[fastProperty(events)] or ps.all
         k           = 0
-        args        = new Array(l - 1)
-        args[k - 1] = arguments[k] while ++k < l
+        args        = []
+        args.push(arguments[k]) while ++k < l
         if space
           triggerEachEvent(ps, events, args)
         else

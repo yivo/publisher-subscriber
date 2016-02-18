@@ -33,7 +33,7 @@
     -> ++counter
   
   getOID = (object) ->
-    object.oid ||= generateOID()
+    object.oid ?= generateOID()
   
   resolveCallback = (object, callback) ->
     if typeof callback is 'string'
@@ -42,13 +42,13 @@
       callback
   
   increaseListeningCount = (pub, sub, n) ->
-    listening = (sub._psTo ||= {})
-    record    = (listening[pub.oid ||= generateOID()] ||= [pub, 0])
+    listening = (sub._psTo ?= {})
+    record    = (listening[pub.oid ?= generateOID()] ?= [pub, 0])
     record[1] += n || 1
     return
   
   decrementListeningCount = (pub, sub, n) ->
-    oid       = pub.oid ||= generateOID()
+    oid       = pub.oid ?= generateOID()
     record    = sub._psTo[oid]
     if record and (record[1] -= n || 1) < 1
       delete sub._psTo[oid]
@@ -91,7 +91,7 @@
   
     bind__Base = (object, event, callback, context, once) ->
       cb = if once then onceWrap(object, event, callback, context) else callback
-      ((object._ps ||= {})[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event] ||= []).push(undefined, cb, context)
+      ((object._ps ?= {})[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event] ?= []).push(undefined, cb, context)
   
     bind__EventString = (object, events, callback, context, once) ->
       if events.indexOf(' ') == -1
@@ -116,7 +116,7 @@
   
     bind__EventMap = (object, hash, context, once) ->
       for events of hash
-        bind__EventString(object, events, resolveCallback(object, hash[events]), context, once)
+        bind__EventString(object, events, (if typeof hash[events] is 'string' then object[hash[events]] else hash[events]), context, once)
       return
   
     for own k, v of { bind: false, bindOnce: true }
@@ -126,7 +126,7 @@
           if typeof events is 'string'
   
             if callback # Added here for spec: "if no callback is provided, `on` is a noop"
-              bind__EventString(this, events, resolveCallback(this, callback), context or this, once)
+              bind__EventString(this, events, (if typeof callback is 'string' then this[callback] else callback), context or this, once)
   
           else
             bind__EventMap(this, events, context or callback or this, once)
@@ -150,7 +150,7 @@
   
     listenTo__Base = (pub, sub, event, callback, once) ->
       cb = if once then onceWrap(pub, sub, event, callback) else callback
-      ((pub._ps ||= {})[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event] ||= []).push(sub, cb, sub)
+      ((pub._ps ?= {})[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event] ?= []).push(sub, cb, sub)
       increaseListeningCount(pub, sub)
       return
   
@@ -171,7 +171,7 @@
   
     listenTo__EventMap = (pub, sub, hash, once) ->
       for events of hash
-        listenTo__EventString(pub, sub, events, resolveCallback(sub, hash[events]), once)
+        listenTo__EventString(pub, sub, events, (if typeof hash[events] is 'string' then sub[hash[events]] else hash[events]), once)
       return
   
     for own k, v of { listenTo: false, listenToOnce: true }
@@ -181,7 +181,7 @@
           if typeof events is 'string'
   
             if callback # Added here for spec: "listenTo with empty callback doesn't throw an error"
-              listenTo__EventString(object, this, events, resolveCallback(this, callback), once)
+              listenTo__EventString(object, this, events, (if typeof callback is 'string' then this[callback] else callback), once)
   
           else
             listenTo__EventMap(object, this, events, once)
@@ -198,7 +198,7 @@
   
       while (k += 3) < l
         if (sub isnt e[k-2]) or (cb and cb not in [e[k-1], e[k-1]._cb])
-          (r ||= []).push(e[k-2], e[k-1], e[k])
+          (r ?= []).push(e[k-2], e[k-1], e[k])
       r
   
     stopListening__Base = (pub, sub, event, callback) ->
@@ -240,7 +240,7 @@
   
     stopListening__EventMap = (pub, sub, hash) ->
       for own events, callback of hash
-        stopListening__EventString(pub, sub, events, resolveCallback(sub, hash[events]))
+        stopListening__EventString(pub, sub, events, (if typeof hash[events] is 'string' then sub[hash[events]] else hash[events]))
       return
   
     stopListening__AnyEvent = (pub, sub, callback) ->
@@ -256,12 +256,12 @@
   
         else if events
           if typeof events is 'string'
-            stopListening__EventString(object, this, events, resolveCallback(this, callback))
+            stopListening__EventString(object, this, events, (if typeof callback is 'string' then this[callback] else callback))
           else
             stopListening__EventMap(object, this, events)
   
         else
-          stopListening__AnyEvent(object, this, resolveCallback(this, callback))
+          stopListening__AnyEvent(object, this, (if typeof callback is 'string' then this[callback] else callback))
   
       this
   
@@ -318,8 +318,8 @@
         # or there entries for `all` event
         if space = (events.indexOf(' ') > -1) or ps[if events.indexOf(':') > -1 then events.replace(/:/g, '_') else events] or ps.all
           k           = 0
-          args        = new Array(l - 1)
-          args[k - 1] = arguments[k] while ++k < l
+          args        = []
+          args.push(arguments[k]) while ++k < l
           if space
             triggerEachEvent(ps, events, args)
           else
@@ -343,7 +343,7 @@
           decrementListeningCount(object, e[k-2]) if e[k-2]
   
         else
-          (r ||= []).push(e[k-2], e[k-1], e[k])
+          (r ?= []).push(e[k-2], e[k-1], e[k])
   
       object._ps[fevent] = r
       return
@@ -362,7 +362,7 @@
   
     unbind__EventMap = (object, hash, context) ->
       for events of hash
-        unbind__EventString(object, events, resolveCallback(object, hash[events]), context)
+        unbind__EventString(object, events, (if typeof hash[events] is 'string' then object[hash[events]] else hash[events]), context)
       return
   
     unbind__Everything = (object) ->
@@ -384,7 +384,7 @@
   
         else if events
           if typeof events is 'string'
-            unbind__EventString(this, events, resolveCallback(this, callback), context)
+            unbind__EventString(this, events, (if typeof callback is 'string' then this[callback] else callback), context)
           else
             unbind__EventMap(this, events, context or callback)
   

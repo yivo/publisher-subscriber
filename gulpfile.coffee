@@ -22,6 +22,8 @@ gulp.task 'build', ->
   .pipe concat('publisher-subscriber.coffee')
   .pipe(replace(/getOID\((\w+)\)/g, '$1.oid ||= generateOID()'))
   .pipe(replace(/fastProperty\((\w+)\)/g, "if $1.indexOf(':') > -1 then $1.replace(/:/g, '_') else $1"))
+  .pipe(replace(/resolveCallback\(([\w\[\]]+),\s*([\w\[\]]+)\)/g, "(if typeof $2 is 'string' then $1[$2] else $2)"))
+  .pipe(replace(/\|\|\=/g, '?='))
   .pipe ejs({}, {ext: '.coffee'})
   .pipe gulp.dest('build')
   .pipe coffee()
