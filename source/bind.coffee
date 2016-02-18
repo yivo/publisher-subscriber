@@ -6,7 +6,7 @@ do ->
         run = true
         pub.off(event, wrapper, context)
         callback.apply(context, arguments)
-        return
+      return
     wrapper._cb = callback
     wrapper
 

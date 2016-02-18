@@ -11,7 +11,7 @@ do ->
 
       if (!cb or cb in [e[k-1], e[k-1]._cb]) and (!ctx or ctx is e[k])
         # Omit!
-        decrementListeningCount(object, e[k-2]) if e[k-2]
+        decrementListeningCount(object, sub, 1) if sub = e[k-2]
 
       else
         (r ||= []).push(e[k-2], e[k-1], e[k])
@@ -39,7 +39,7 @@ do ->
   unbind__Everything = (object) ->
     for event, entries of object._ps when entries
       for sub in entries by 3 when sub
-        decrementListeningCount(object, sub)
+        decrementListeningCount(object, sub, 1)
     object._ps = null
     return
 

@@ -6,7 +6,7 @@ do ->
         run = true
         sub.stopListening(pub, event, wrapper)
         callback.apply(sub, arguments)
-        return
+      return
     wrapper._cb = callback
     wrapper
 

@@ -15,13 +15,13 @@
       root.PublisherSubscriber = factory(root);
     }
   })(function(__root__) {
-    var PS, decrementListeningCount, fastProperty, generateOID, getOID, increaseListeningCount, isArrayLike, isEventable, isNoisy, resolveCallback;
+    var PS, decrementListeningCount, fastProperty, generateOID, getOID, increaseListeningCount, isArrayLike, isEventable, isNoisy, ref, resolveCallback;
     PS = {};
-    generateOID = (function() {
-      var counter;
-      counter = 0;
+    generateOID = ((ref = __root__._) != null ? ref.generateID : void 0) || (function() {
+      var n;
+      n = 0;
       return function() {
-        return ++counter;
+        return ++n;
       };
     })();
     getOID = function(object) {
@@ -34,17 +34,17 @@
         return callback;
       }
     };
-    increaseListeningCount = function(pub, sub, n) {
+    increaseListeningCount = function(pub, sub) {
       var listening, name, record;
       listening = (sub._psTo != null ? sub._psTo : sub._psTo = {});
       record = (listening[name = pub.oid != null ? pub.oid : pub.oid = generateOID()] != null ? listening[name] : listening[name] = [pub, 0]);
-      record[1] += n || 1;
+      record[1] += 1;
     };
     decrementListeningCount = function(pub, sub, n) {
       var oid, record;
       oid = pub.oid != null ? pub.oid : pub.oid = generateOID();
       record = sub._psTo[oid];
-      if (record && (record[1] -= n || 1) < 1) {
+      if (record && (record[1] -= n | 0) < 1) {
         delete sub._psTo[oid];
       }
     };
@@ -65,7 +65,7 @@
       return obj && obj.on === PS.on;
     };
     (function() {
-      var bind__Base, bind__EventList, bind__EventMap, bind__EventString, fn, k, onceWrap, ref, v;
+      var bind__Base, bind__EventList, bind__EventMap, bind__EventString, fn, k, onceWrap, ref1, v;
       onceWrap = function(pub, event, callback, context) {
         var run, wrapper;
         run = false;
@@ -85,9 +85,10 @@
         return ((base = (object._ps != null ? object._ps : object._ps = {}))[name = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event] != null ? base[name] : base[name] = []).push(void 0, cb, context);
       };
       bind__EventString = function(object, events, callback, context, once) {
-        var i, j, l;
+        var base, base1, cb, event, i, j, l, name, name1;
         if (events.indexOf(' ') === -1) {
-          bind__Base(object, events, callback, context, once);
+          cb = (once ? onceWrap(object, events, callback, context) : callback);
+          ((base = (object._ps != null ? object._ps : object._ps = {}))[name = events.indexOf(':') > -1 ? events.replace(/:/g, '_') : events] != null ? base[name] : base[name] = []).push(void 0, cb, context);
         } else {
           l = events.length;
           i = -1;
@@ -95,7 +96,9 @@
           while (++i <= l) {
             if (i === l || events[i] === ' ') {
               if (j > 0) {
-                bind__Base(object, events.slice(i - j, i), callback, context, once);
+                event = events.slice(i - j, i);
+                cb = (once ? onceWrap(object, event, callback, context) : callback);
+                ((base1 = (object._ps != null ? object._ps : object._ps = {}))[name1 = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event] != null ? base1[name1] : base1[name1] = []).push(void 0, cb, context);
                 j = 0;
               }
             } else {
@@ -117,7 +120,7 @@
           bind__EventString(object, events, (typeof hash[events] === 'string' ? object[hash[events]] : hash[events]), context, once);
         }
       };
-      ref = {
+      ref1 = {
         bind: false,
         bindOnce: true
       };
@@ -133,16 +136,16 @@
           return this;
         };
       };
-      for (k in ref) {
-        if (!hasProp.call(ref, k)) continue;
-        v = ref[k];
+      for (k in ref1) {
+        if (!hasProp.call(ref1, k)) continue;
+        v = ref1[k];
         fn(k, v);
       }
       PS.on = PS.bind;
       PS.once = PS.bindOnce;
     })();
     (function() {
-      var fn, k, listenTo__Base, listenTo__EventMap, listenTo__EventString, onceWrap, ref, v;
+      var fn, k, listenTo__Base, listenTo__EventMap, listenTo__EventString, onceWrap, ref1, v;
       onceWrap = function(pub, sub, event, callback) {
         var run, wrapper;
         run = false;
@@ -157,10 +160,12 @@
         return wrapper;
       };
       listenTo__Base = function(pub, sub, event, callback, once) {
-        var base, cb, name;
+        var base, cb, listening, name, name1, record;
         cb = once ? onceWrap(pub, sub, event, callback) : callback;
         ((base = (pub._ps != null ? pub._ps : pub._ps = {}))[name = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event] != null ? base[name] : base[name] = []).push(sub, cb, sub);
-        increaseListeningCount(pub, sub);
+        listening = (sub._psTo != null ? sub._psTo : sub._psTo = {});
+        record = (listening[name1 = pub.oid != null ? pub.oid : pub.oid = generateOID()] != null ? listening[name1] : listening[name1] = [pub, 0]);
+        record[1] += 1;
       };
       listenTo__EventString = function(pub, sub, events, callback, once) {
         var i, j, l;
@@ -188,7 +193,7 @@
           listenTo__EventString(pub, sub, events, (typeof hash[events] === 'string' ? sub[hash[events]] : hash[events]), once);
         }
       };
-      ref = {
+      ref1 = {
         listenTo: false,
         listenToOnce: true
       };
@@ -204,83 +209,96 @@
           return this;
         };
       };
-      for (k in ref) {
-        if (!hasProp.call(ref, k)) continue;
-        v = ref[k];
+      for (k in ref1) {
+        if (!hasProp.call(ref1, k)) continue;
+        v = ref1[k];
         fn(k, v);
       }
     })();
     (function() {
-      var filterEntries, stopListening__AnyEvent, stopListening__Base, stopListening__EventMap, stopListening__EventString, stopListening__Everything;
+      var filterEntries, stopListening__AnyEvent, stopListening__Base, stopListening__EventMap, stopListening__EventString, stopListening__EventString__Iteration, stopListening__Everything, stopListening__Everything__Iteration;
       filterEntries = function(e, sub, cb) {
         var k, l, r;
-        if ((l = e.length) < 3) {
-          return;
-        }
-        r = null;
+        l = e.length;
+        r = [];
         k = -1;
         while ((k += 3) < l) {
           if ((sub !== e[k - 2]) || (cb && (cb !== e[k - 1] && cb !== e[k - 1]._cb))) {
-            (r != null ? r : r = []).push(e[k - 2], e[k - 1], e[k]);
+            r.push(e[k - 2], e[k - 1], e[k]);
           }
         }
         return r;
       };
       stopListening__Base = function(pub, sub, event, callback) {
-        var entries, fevent, filtered, n, ps;
+        var entries, fevent, filtered, l, n, ps;
         n = 0;
         ps = pub._ps;
         fevent = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event;
         if (ps && (entries = ps[fevent])) {
-          filtered = filterEntries(entries, sub, callback);
-          n += entries.length - ((filtered != null ? filtered.length : void 0) | 0);
+          l = entries.length;
+          n += l;
+          if (l > 2) {
+            filtered = filterEntries(entries, sub, callback);
+            n -= filtered.length;
+          }
           ps[fevent] = filtered;
           if (n > 0) {
             decrementListeningCount(pub, sub, n / 3);
           }
         }
       };
-      stopListening__Everything = function(object) {
-        var entries, event, filtered, n, oid, pair, ps, pub, ref;
-        ref = object._psTo;
-        for (oid in ref) {
-          pair = ref[oid];
-          pub = pair[0];
-          ps = pub._ps;
-          n = 0;
-          for (event in ps) {
-            entries = ps[event];
-            if (!(entries)) {
-              continue;
-            }
-            filtered = filterEntries(entries, object);
-            n += entries.length - ((filtered != null ? filtered.length : void 0) | 0);
-            ps[event] = filtered;
+      stopListening__Everything__Iteration = function(pub, sub) {
+        var entries, event, filtered, l, n, ps;
+        ps = pub._ps;
+        n = 0;
+        for (event in ps) {
+          entries = ps[event];
+          if (!(entries)) {
+            continue;
           }
-          if (n > 0) {
-            decrementListeningCount(pub, object, n / 3);
+          l = entries.length;
+          n += l;
+          if (l > 2) {
+            filtered = filterEntries(entries, sub);
+            n -= filtered.length;
           }
+          ps[event] = filtered;
+        }
+        if (n > 0) {
+          decrementListeningCount(pub, sub, n / 3);
+        }
+      };
+      stopListening__Everything = function(sub) {
+        var oid, pair, ref1;
+        ref1 = sub._psTo;
+        for (oid in ref1) {
+          pair = ref1[oid];
+          stopListening__Everything__Iteration(pair[0], sub);
         }
       };
       stopListening__EventString = function(pub, sub, events, callback) {
-        var i, j, l, oid, pair, ref;
+        var i, j, l;
         l = events.length;
         i = -1;
         j = 0;
         while (++i <= l) {
           if (i === l || events[i] === ' ') {
             if (j > 0) {
-              ref = sub._psTo;
-              for (oid in ref) {
-                pair = ref[oid];
-                if (!pub || pair[0] === pub) {
-                  stopListening__Base(pair[0], sub, events.slice(i - j, i), callback);
-                }
-              }
+              stopListening__EventString__Iteration(pub, sub, events.slice(i - j, i), callback);
               j = 0;
             }
           } else {
             ++j;
+          }
+        }
+      };
+      stopListening__EventString__Iteration = function(pub, sub, event, callback) {
+        var oid, pair, ref1;
+        ref1 = sub._psTo;
+        for (oid in ref1) {
+          pair = ref1[oid];
+          if (!pub || pair[0] === pub) {
+            stopListening__Base(pair[0], sub, event, callback);
           }
         }
       };
@@ -293,10 +311,10 @@
         }
       };
       stopListening__AnyEvent = function(pub, sub, callback) {
-        var event, ipub, oid, pair, ref;
-        ref = sub._psTo;
-        for (oid in ref) {
-          pair = ref[oid];
+        var event, ipub, oid, pair, ref1;
+        ref1 = sub._psTo;
+        for (oid in ref1) {
+          pair = ref1[oid];
           if (!pub || (ipub = pair[0]) === pub) {
             for (event in ipub._ps) {
               stopListening__Base(ipub, sub, event, callback);
@@ -414,7 +432,7 @@
     (function() {
       var unbind__AnyEvent, unbind__Base, unbind__EventMap, unbind__EventString, unbind__Everything;
       unbind__Base = function(object, event, cb, ctx) {
-        var e, fevent, k, len, r;
+        var e, fevent, k, len, r, sub;
         fevent = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event;
         if (!(e = object._ps[fevent])) {
           return;
@@ -426,8 +444,8 @@
         k = -1;
         while ((k += 3) < len) {
           if ((!cb || (cb === e[k - 1] || cb === e[k - 1]._cb)) && (!ctx || ctx === e[k])) {
-            if (e[k - 2]) {
-              decrementListeningCount(object, e[k - 2]);
+            if (sub = e[k - 2]) {
+              decrementListeningCount(object, sub, 1);
             }
           } else {
             (r != null ? r : r = []).push(e[k - 2], e[k - 1], e[k]);
@@ -458,15 +476,15 @@
         }
       };
       unbind__Everything = function(object) {
-        var entries, event, len1, m, ref, sub;
-        ref = object._ps;
-        for (event in ref) {
-          entries = ref[event];
+        var entries, event, len1, m, ref1, sub;
+        ref1 = object._ps;
+        for (event in ref1) {
+          entries = ref1[event];
           if (entries) {
             for (m = 0, len1 = entries.length; m < len1; m += 3) {
               sub = entries[m];
               if (sub) {
-                decrementListeningCount(object, sub);
+                decrementListeningCount(object, sub, 1);
               }
             }
           }

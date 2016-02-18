@@ -28,9 +28,9 @@
 )((__root__) ->
   PS = {}
   
-  generateOID =  do ->
-    counter = 0
-    -> ++counter
+  generateOID = __root__._?.generateID or do ->
+    n = 0
+    -> ++n
   
   getOID = (object) ->
     object.oid ?= generateOID()
@@ -41,16 +41,16 @@
     else
       callback
   
-  increaseListeningCount = (pub, sub, n) ->
+  increaseListeningCount = (pub, sub) ->
     listening = (sub._psTo ?= {})
     record    = (listening[pub.oid ?= generateOID()] ?= [pub, 0])
-    record[1] += n || 1
+    record[1] += 1
     return
   
   decrementListeningCount = (pub, sub, n) ->
     oid       = pub.oid ?= generateOID()
     record    = sub._psTo[oid]
-    if record and (record[1] -= n || 1) < 1
+    if record and (record[1] -= n | 0) < 1
       delete sub._psTo[oid]
     return
   
@@ -85,7 +85,7 @@
           run = true
           pub.off(event, wrapper, context)
           callback.apply(context, arguments)
-          return
+        return
       wrapper._cb = callback
       wrapper
   
@@ -95,7 +95,7 @@
   
     bind__EventString = (object, events, callback, context, once) ->
       if events.indexOf(' ') == -1
-        bind__Base(object, events, callback, context, once)
+        cb = (if once then onceWrap(object, events, callback, context) else callback);((object._ps ?= {})[if events.indexOf(':') > -1 then events.replace(/:/g, '_') else events] ?= []).push(undefined, cb, context)
       else
         l = events.length
         i = -1
@@ -103,7 +103,7 @@
         while ++i <= l
           if i is l or events[i] is ' '
             if j > 0
-              bind__Base(object, events[i - j...i], callback, context, once)
+              event = events[i - j...i]; cb = (if once then onceWrap(object, event, callback, context) else callback);((object._ps ?= {})[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event] ?= []).push(undefined, cb, context)
               j = 0
           else ++j
       return
@@ -144,14 +144,14 @@
           run = true
           sub.stopListening(pub, event, wrapper)
           callback.apply(sub, arguments)
-          return
+        return
       wrapper._cb = callback
       wrapper
   
     listenTo__Base = (pub, sub, event, callback, once) ->
       cb = if once then onceWrap(pub, sub, event, callback) else callback
       ((pub._ps ?= {})[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event] ?= []).push(sub, cb, sub)
-      increaseListeningCount(pub, sub)
+      listening = (sub._psTo ?= {}); record = (listening[pub.oid ?= generateOID()] ?= [pub, 0]); record[1] += 1;
       return
   
     listenTo__EventString = (pub, sub, events, callback, once) ->
@@ -191,14 +191,13 @@
   
   do ->
     filterEntries = (e, sub, cb) ->
-      return if (l = e.length) < 3
-  
-      r = null
+      l = e.length
+      r = []
       k = -1
   
       while (k += 3) < l
         if (sub isnt e[k-2]) or (cb and cb not in [e[k-1], e[k-1]._cb])
-          (r ?= []).push(e[k-2], e[k-1], e[k])
+          r.push(e[k-2], e[k-1], e[k])
       r
   
     stopListening__Base = (pub, sub, event, callback) ->
@@ -207,22 +206,31 @@
       fevent  = if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event
   
       if ps and (entries = ps[fevent])
-        filtered = filterEntries(entries, sub, callback)
-        n += entries.length - (filtered?.length | 0)
+        l  = entries.length
+        n += l
+        if l > 2
+          filtered = filterEntries(entries, sub, callback)
+          n       -= filtered.length
         ps[fevent] = filtered
         decrementListeningCount(pub, sub, n / 3) if n > 0
       return
   
-    stopListening__Everything = (object) ->
-      for oid, pair of object._psTo
-        pub   = pair[0]
-        ps    = pub._ps
-        n     = 0
-        for event, entries of ps when entries
-          filtered = filterEntries(entries, object)
-          n += entries.length - (filtered?.length | 0)
-          ps[event] = filtered
-        decrementListeningCount(pub, object, n / 3) if n > 0
+    stopListening__Everything__Iteration = (pub, sub) ->
+      ps    = pub._ps
+      n     = 0
+      for event, entries of ps when entries
+        l  = entries.length
+        n += l
+        if l > 2
+          filtered = filterEntries(entries, sub)
+          n       -= filtered.length
+        ps[event] = filtered
+      decrementListeningCount(pub, sub, n / 3) if n > 0
+      return
+  
+    stopListening__Everything = (sub) ->
+      for oid, pair of sub._psTo
+        stopListening__Everything__Iteration(pair[0], sub)
       return
   
     stopListening__EventString = (pub, sub, events, callback) ->
@@ -232,10 +240,14 @@
       while ++i <= l
         if i is l or events[i] is ' '
           if j > 0
-            for oid, pair of sub._psTo when !pub or pair[0] is pub
-              stopListening__Base(pair[0], sub, events[i - j...i], callback)
+            stopListening__EventString__Iteration(pub, sub, events[i - j...i], callback)
             j = 0
         else ++j
+      return
+  
+    stopListening__EventString__Iteration = (pub, sub, event, callback) ->
+      for oid, pair of sub._psTo when !pub or pair[0] is pub
+        stopListening__Base(pair[0], sub, event, callback)
       return
   
     stopListening__EventMap = (pub, sub, hash) ->
@@ -340,7 +352,7 @@
   
         if (!cb or cb in [e[k-1], e[k-1]._cb]) and (!ctx or ctx is e[k])
           # Omit!
-          decrementListeningCount(object, e[k-2]) if e[k-2]
+          decrementListeningCount(object, sub, 1) if sub = e[k-2]
   
         else
           (r ?= []).push(e[k-2], e[k-1], e[k])
@@ -368,7 +380,7 @@
     unbind__Everything = (object) ->
       for event, entries of object._ps when entries
         for sub in entries by 3 when sub
-          decrementListeningCount(object, sub)
+          decrementListeningCount(object, sub, 1)
       object._ps = null
       return
   

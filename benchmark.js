@@ -60,7 +60,8 @@ function iteration(Events) {
 
 var suite = new Benchmark.Suite();
 
-suite.add('BackboneEvents', function() {
+suite
+    .add('BackboneEvents', function() {
         iteration(BackboneEvents);
     })
     .add('PublisherSubscriber', function() {
