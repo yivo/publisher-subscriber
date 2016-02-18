@@ -15,15 +15,18 @@ do ->
     ((object._ps ||= {})[fastProperty(event)] ||= []).push(undefined, cb, context)
 
   bind__EventString = (object, events, callback, context, once) ->
-    l = events.length
-    i = -1
-    j = 0
-    while ++i <= l
-      if i is l or events[i] is ' '
-        if j > 0
-          bind__Base(object, events[i - j...i], callback, context, once)
-          j = 0
-      else ++j
+    if events.indexOf(' ') == -1
+      bind__Base(object, events, callback, context, once)
+    else
+      l = events.length
+      i = -1
+      j = 0
+      while ++i <= l
+        if i is l or events[i] is ' '
+          if j > 0
+            bind__Base(object, events[i - j...i], callback, context, once)
+            j = 0
+        else ++j
     return
 
   # TODO Event list binding

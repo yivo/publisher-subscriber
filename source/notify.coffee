@@ -47,10 +47,13 @@ do ->
       # If space-separated events
       # or there entries for [event]
       # or there entries for `all` event
-      if events.indexOf(' ') > -1 or ps[fastProperty(events)] or ps.all
+      if space = (events.indexOf(' ') > -1) or ps[fastProperty(events)] or ps.all
         k           = 0
         args        = new Array(l - 1)
         args[k - 1] = arguments[k] while ++k < l
-        triggerEachEvent(ps, events, args)
+        if space
+          triggerEachEvent(ps, events, args)
+        else
+          triggerEvent(ps, events, args)
     this
   return

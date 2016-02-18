@@ -94,15 +94,18 @@
       ((object._ps ||= {})[fastProperty(event)] ||= []).push(undefined, cb, context)
   
     bind__EventString = (object, events, callback, context, once) ->
-      l = events.length
-      i = -1
-      j = 0
-      while ++i <= l
-        if i is l or events[i] is ' '
-          if j > 0
-            bind__Base(object, events[i - j...i], callback, context, once)
-            j = 0
-        else ++j
+      if events.indexOf(' ') == -1
+        bind__Base(object, events, callback, context, once)
+      else
+        l = events.length
+        i = -1
+        j = 0
+        while ++i <= l
+          if i is l or events[i] is ' '
+            if j > 0
+              bind__Base(object, events[i - j...i], callback, context, once)
+              j = 0
+          else ++j
       return
   
     # TODO Event list binding
@@ -152,15 +155,18 @@
       return
   
     listenTo__EventString = (pub, sub, events, callback, once) ->
-      l = events.length
-      i = -1
-      j = 0
-      while ++i <= l
-        if i is l or events[i] is ' '
-          if j > 0
-            listenTo__Base(pub, sub, events[i - j...i], callback, once)
-            j = 0
-        else ++j
+      if events.indexOf(' ') == -1
+        listenTo__Base(pub, sub, events, callback, once)
+      else
+        l = events.length
+        i = -1
+        j = 0
+        while ++i <= l
+          if i is l or events[i] is ' '
+            if j > 0
+              listenTo__Base(pub, sub, events[i - j...i], callback, once)
+              j = 0
+          else ++j
       return
   
     listenTo__EventMap = (pub, sub, hash, once) ->
@@ -310,11 +316,14 @@
         # If space-separated events
         # or there entries for [event]
         # or there entries for `all` event
-        if events.indexOf(' ') > -1 or ps[fastProperty(events)] or ps.all
+        if space = (events.indexOf(' ') > -1) or ps[fastProperty(events)] or ps.all
           k           = 0
           args        = new Array(l - 1)
           args[k - 1] = arguments[k] while ++k < l
-          triggerEachEvent(ps, events, args)
+          if space
+            triggerEachEvent(ps, events, args)
+          else
+            triggerEvent(ps, events, args)
       this
     return
   
@@ -389,7 +398,7 @@
   isNoisy:         isNoisy
   isEventable:     isEventable
   InstanceMembers: PS
-  included:        (Class) ->
-                     Class.initializer? -> @_ps = {}; @_psTo = {}; return
+  #included:        (Class) ->
+  #                   Class.initializer? -> @_ps = {}; @_psTo = {}; return
   
 )

@@ -11,5 +11,5 @@ VERSION:         '1.0.3'
 isNoisy:         isNoisy
 isEventable:     isEventable
 InstanceMembers: PS
-included:        (Class) ->
-                   Class.initializer? -> @_ps = {}; @_psTo = {}; return
+#included:        (Class) ->
+#                   Class.initializer? -> @_ps = {}; @_psTo = {}; return

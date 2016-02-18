@@ -86,17 +86,21 @@
       };
       bind__EventString = function(object, events, callback, context, once) {
         var i, j, l;
-        l = events.length;
-        i = -1;
-        j = 0;
-        while (++i <= l) {
-          if (i === l || events[i] === ' ') {
-            if (j > 0) {
-              bind__Base(object, events.slice(i - j, i), callback, context, once);
-              j = 0;
+        if (events.indexOf(' ') === -1) {
+          bind__Base(object, events, callback, context, once);
+        } else {
+          l = events.length;
+          i = -1;
+          j = 0;
+          while (++i <= l) {
+            if (i === l || events[i] === ' ') {
+              if (j > 0) {
+                bind__Base(object, events.slice(i - j, i), callback, context, once);
+                j = 0;
+              }
+            } else {
+              ++j;
             }
-          } else {
-            ++j;
           }
         }
       };
@@ -160,17 +164,21 @@
       };
       listenTo__EventString = function(pub, sub, events, callback, once) {
         var i, j, l;
-        l = events.length;
-        i = -1;
-        j = 0;
-        while (++i <= l) {
-          if (i === l || events[i] === ' ') {
-            if (j > 0) {
-              listenTo__Base(pub, sub, events.slice(i - j, i), callback, once);
-              j = 0;
+        if (events.indexOf(' ') === -1) {
+          listenTo__Base(pub, sub, events, callback, once);
+        } else {
+          l = events.length;
+          i = -1;
+          j = 0;
+          while (++i <= l) {
+            if (i === l || events[i] === ' ') {
+              if (j > 0) {
+                listenTo__Base(pub, sub, events.slice(i - j, i), callback, once);
+                j = 0;
+              }
+            } else {
+              ++j;
             }
-          } else {
-            ++j;
           }
         }
       };
@@ -385,15 +393,19 @@
         }
       };
       PS.trigger = PS.notify = function(events) {
-        var args, k, l, ps;
+        var args, k, l, ps, space;
         if ((ps = this._ps) && (l = arguments.length) > 0) {
-          if (events.indexOf(' ') > -1 || ps[fastProperty(events)] || ps.all) {
+          if (space = (events.indexOf(' ') > -1) || ps[fastProperty(events)] || ps.all) {
             k = 0;
             args = new Array(l - 1);
             while (++k < l) {
               args[k - 1] = arguments[k];
             }
-            triggerEachEvent(ps, events, args);
+            if (space) {
+              triggerEachEvent(ps, events, args);
+            } else {
+              triggerEvent(ps, events, args);
+            }
           }
         }
         return this;
@@ -488,13 +500,7 @@
       VERSION: '1.0.3',
       isNoisy: isNoisy,
       isEventable: isEventable,
-      InstanceMembers: PS,
-      included: function(Class) {
-        return typeof Class.initializer === "function" ? Class.initializer(function() {
-          this._ps = {};
-          this._psTo = {};
-        }) : void 0;
-      }
+      InstanceMembers: PS
     };
   });
 

@@ -17,15 +17,18 @@ do ->
     return
 
   listenTo__EventString = (pub, sub, events, callback, once) ->
-    l = events.length
-    i = -1
-    j = 0
-    while ++i <= l
-      if i is l or events[i] is ' '
-        if j > 0
-          listenTo__Base(pub, sub, events[i - j...i], callback, once)
-          j = 0
-      else ++j
+    if events.indexOf(' ') == -1
+      listenTo__Base(pub, sub, events, callback, once)
+    else
+      l = events.length
+      i = -1
+      j = 0
+      while ++i <= l
+        if i is l or events[i] is ' '
+          if j > 0
+            listenTo__Base(pub, sub, events[i - j...i], callback, once)
+            j = 0
+        else ++j
     return
 
   listenTo__EventMap = (pub, sub, hash, once) ->
