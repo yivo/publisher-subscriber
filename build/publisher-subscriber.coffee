@@ -43,12 +43,12 @@
   
   increaseListeningCount = (pub, sub, n) ->
     listening = (sub._psTo ||= {})
-    record    = (listening[getOID(pub)] ||= [pub, 0])
+    record    = (listening[pub.oid ||= generateOID()] ||= [pub, 0])
     record[1] += n || 1
     return
   
   decrementListeningCount = (pub, sub, n) ->
-    oid       = getOID(pub)
+    oid       = pub.oid ||= generateOID()
     record    = sub._psTo[oid]
     if record and (record[1] -= n || 1) < 1
       delete sub._psTo[oid]
@@ -91,7 +91,7 @@
   
     bind__Base = (object, event, callback, context, once) ->
       cb = if once then onceWrap(object, event, callback, context) else callback
-      ((object._ps ||= {})[fastProperty(event)] ||= []).push(undefined, cb, context)
+      ((object._ps ||= {})[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event] ||= []).push(undefined, cb, context)
   
     bind__EventString = (object, events, callback, context, once) ->
       if events.indexOf(' ') == -1
@@ -150,7 +150,7 @@
   
     listenTo__Base = (pub, sub, event, callback, once) ->
       cb = if once then onceWrap(pub, sub, event, callback) else callback
-      ((pub._ps ||= {})[fastProperty(event)] ||= []).push(sub, cb, sub)
+      ((pub._ps ||= {})[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event] ||= []).push(sub, cb, sub)
       increaseListeningCount(pub, sub)
       return
   
@@ -204,7 +204,7 @@
     stopListening__Base = (pub, sub, event, callback) ->
       n       = 0
       ps      = pub._ps
-      fevent  = fastProperty(event)
+      fevent  = if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event
   
       if ps and (entries = ps[fevent])
         filtered = filterEntries(entries, sub, callback)
@@ -285,7 +285,7 @@
       return
   
     triggerEvent = (ps, event, args) ->
-      list    = ps[fastProperty(event)]
+      list    = ps[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event]
       allList = ps.all
   
       if list
@@ -316,7 +316,7 @@
         # If space-separated events
         # or there entries for [event]
         # or there entries for `all` event
-        if space = (events.indexOf(' ') > -1) or ps[fastProperty(events)] or ps.all
+        if space = (events.indexOf(' ') > -1) or ps[if events.indexOf(':') > -1 then events.replace(/:/g, '_') else events] or ps.all
           k           = 0
           args        = new Array(l - 1)
           args[k - 1] = arguments[k] while ++k < l
@@ -329,7 +329,7 @@
   
   do ->
     unbind__Base = (object, event, cb, ctx) ->
-      fevent = fastProperty(event)
+      fevent = if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event
       return if not e = object._ps[fevent]
       return if (len = e.length) < 3
   

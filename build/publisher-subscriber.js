@@ -37,12 +37,12 @@
     increaseListeningCount = function(pub, sub, n) {
       var listening, name, record;
       listening = (sub._psTo || (sub._psTo = {}));
-      record = (listening[name = getOID(pub)] || (listening[name] = [pub, 0]));
+      record = (listening[name = pub.oid || (pub.oid = generateOID())] || (listening[name] = [pub, 0]));
       record[1] += n || 1;
     };
     decrementListeningCount = function(pub, sub, n) {
       var oid, record;
-      oid = getOID(pub);
+      oid = pub.oid || (pub.oid = generateOID());
       record = sub._psTo[oid];
       if (record && (record[1] -= n || 1) < 1) {
         delete sub._psTo[oid];
@@ -82,7 +82,7 @@
       bind__Base = function(object, event, callback, context, once) {
         var base, cb, name;
         cb = once ? onceWrap(object, event, callback, context) : callback;
-        return ((base = (object._ps || (object._ps = {})))[name = fastProperty(event)] || (base[name] = [])).push(void 0, cb, context);
+        return ((base = (object._ps || (object._ps = {})))[name = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event] || (base[name] = [])).push(void 0, cb, context);
       };
       bind__EventString = function(object, events, callback, context, once) {
         var i, j, l;
@@ -159,7 +159,7 @@
       listenTo__Base = function(pub, sub, event, callback, once) {
         var base, cb, name;
         cb = once ? onceWrap(pub, sub, event, callback) : callback;
-        ((base = (pub._ps || (pub._ps = {})))[name = fastProperty(event)] || (base[name] = [])).push(sub, cb, sub);
+        ((base = (pub._ps || (pub._ps = {})))[name = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event] || (base[name] = [])).push(sub, cb, sub);
         increaseListeningCount(pub, sub);
       };
       listenTo__EventString = function(pub, sub, events, callback, once) {
@@ -230,7 +230,7 @@
         var entries, fevent, filtered, n, ps;
         n = 0;
         ps = pub._ps;
-        fevent = fastProperty(event);
+        fevent = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event;
         if (ps && (entries = ps[fevent])) {
           filtered = filterEntries(entries, sub, callback);
           n += entries.length - ((filtered != null ? filtered.length : void 0) | 0);
@@ -362,7 +362,7 @@
       };
       triggerEvent = function(ps, event, args) {
         var allList, list;
-        list = ps[fastProperty(event)];
+        list = ps[event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event];
         allList = ps.all;
         if (list) {
           if (allList) {
@@ -395,7 +395,7 @@
       PS.trigger = PS.notify = function(events) {
         var args, k, l, ps, space;
         if ((ps = this._ps) && (l = arguments.length) > 0) {
-          if (space = (events.indexOf(' ') > -1) || ps[fastProperty(events)] || ps.all) {
+          if (space = (events.indexOf(' ') > -1) || ps[events.indexOf(':') > -1 ? events.replace(/:/g, '_') : events] || ps.all) {
             k = 0;
             args = new Array(l - 1);
             while (++k < l) {
@@ -415,7 +415,7 @@
       var unbind__AnyEvent, unbind__Base, unbind__EventMap, unbind__EventString, unbind__Everything;
       unbind__Base = function(object, event, cb, ctx) {
         var e, fevent, k, len, r;
-        fevent = fastProperty(event);
+        fevent = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event;
         if (!(e = object._ps[fevent])) {
           return;
         }
