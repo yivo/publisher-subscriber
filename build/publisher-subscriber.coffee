@@ -410,10 +410,12 @@
     return
   
   
-  VERSION:         '1.0.3'
+  VERSION:         '1.0.4'
   isNoisy:         isNoisy
   isEventable:     isEventable
   InstanceMembers: PS
-  included:        (Class) -> Class.initializer? -> @_2 = {}; @_3 = {}; return
+  included:        (Class) ->
+    Class.initializer? 'publisher-subscriber', -> @_2 = {}; @_3 = {}; return
+    return
   
 )

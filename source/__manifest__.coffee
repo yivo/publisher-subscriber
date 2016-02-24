@@ -11,4 +11,6 @@ VERSION:         '1.0.4'
 isNoisy:         isNoisy
 isEventable:     isEventable
 InstanceMembers: PS
-included:        (Class) -> Class.initializer? -> @_ps = {}; @_psTo = {}; return
+included:        (Class) ->
+  Class.initializer? 'publisher-subscriber', -> @_ps = {}; @_psTo = {}; return
+  return

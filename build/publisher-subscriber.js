@@ -520,15 +520,17 @@
       };
     })();
     return {
-      VERSION: '1.0.3',
+      VERSION: '1.0.4',
       isNoisy: isNoisy,
       isEventable: isEventable,
       InstanceMembers: PS,
       included: function(Class) {
-        return typeof Class.initializer === "function" ? Class.initializer(function() {
-          this._2 = {};
-          this._3 = {};
-        }) : void 0;
+        if (typeof Class.initializer === "function") {
+          Class.initializer('publisher-subscriber', function() {
+            this._2 = {};
+            this._3 = {};
+          });
+        }
       }
     };
   });
