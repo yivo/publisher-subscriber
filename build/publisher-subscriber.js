@@ -15,9 +15,9 @@
       root.PublisherSubscriber = factory(root);
     }
   })(function(__root__) {
-    var PS, decrementListeningCount, fastProperty, generateOID, getOID, increaseListeningCount, isArrayLike, isEventable, isNoisy, ref, resolveCallback;
+    var PS, decrementListeningCount, fastProperty, generateOID, getOID, increaseListeningCount, isArrayLike, isEventable, isNoisy, ref1, resolveCallback;
     PS = {};
-    generateOID = ((ref = __root__._) != null ? ref.generateID : void 0) || (function() {
+    generateOID = ((ref1 = __root__._) != null ? ref1.generateID : void 0) || (function() {
       var n;
       n = 0;
       return function() {
@@ -44,7 +44,7 @@
       var oid, record;
       oid = pub.oid != null ? pub.oid : pub.oid = generateOID();
       record = sub._psTo[oid];
-      if (record && (record[1] -= n | 0) < 1) {
+      if ((record != null) && (record[1] -= n | 0) < 1) {
         delete sub._psTo[oid];
       }
     };
@@ -65,7 +65,7 @@
       return obj && obj.on === PS.on;
     };
     (function() {
-      var bind__Base, bind__EventList, bind__EventMap, bind__EventString, fn, k, onceWrap, ref1, v;
+      var bind__Base, bind__EventList, bind__EventMap, bind__EventString, fn, k, onceWrap, ref2, v;
       onceWrap = function(pub, event, callback, context) {
         var run, wrapper;
         run = false;
@@ -81,13 +81,13 @@
       };
       bind__Base = function(object, event, callback, context, once) {
         var base, cb, name;
-        cb = once ? onceWrap(object, event, callback, context) : callback;
+        cb = once === true ? onceWrap(object, event, callback, context) : callback;
         return ((base = (object._ps != null ? object._ps : object._ps = {}))[name = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event] != null ? base[name] : base[name] = []).push(void 0, cb, context);
       };
       bind__EventString = function(object, events, callback, context, once) {
         var base, base1, cb, event, i, j, l, name, name1;
         if (events.indexOf(' ') === -1) {
-          cb = (once ? onceWrap(object, events, callback, context) : callback);
+          cb = (once === true ? onceWrap(object, events, callback, context) : callback);
           ((base = (object._ps != null ? object._ps : object._ps = {}))[name = events.indexOf(':') > -1 ? events.replace(/:/g, '_') : events] != null ? base[name] : base[name] = []).push(void 0, cb, context);
         } else {
           l = events.length;
@@ -97,7 +97,7 @@
             if (i === l || events[i] === ' ') {
               if (j > 0) {
                 event = events.slice(i - j, i);
-                cb = (once ? onceWrap(object, event, callback, context) : callback);
+                cb = (once === true ? onceWrap(object, event, callback, context) : callback);
                 ((base1 = (object._ps != null ? object._ps : object._ps = {}))[name1 = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event] != null ? base1[name1] : base1[name1] = []).push(void 0, cb, context);
                 j = 0;
               }
@@ -120,7 +120,7 @@
           bind__EventString(object, events, (typeof hash[events] === 'string' ? object[hash[events]] : hash[events]), context, once);
         }
       };
-      ref1 = {
+      ref2 = {
         bind: false,
         bindOnce: true
       };
@@ -136,16 +136,16 @@
           return this;
         };
       };
-      for (k in ref1) {
-        if (!hasProp.call(ref1, k)) continue;
-        v = ref1[k];
+      for (k in ref2) {
+        if (!hasProp.call(ref2, k)) continue;
+        v = ref2[k];
         fn(k, v);
       }
       PS.on = PS.bind;
       PS.once = PS.bindOnce;
     })();
     (function() {
-      var fn, k, listenTo__Base, listenTo__EventMap, listenTo__EventString, onceWrap, ref1, v;
+      var fn, k, listenTo__Base, listenTo__EventMap, listenTo__EventString, onceWrap, ref2, v;
       onceWrap = function(pub, sub, event, callback) {
         var run, wrapper;
         run = false;
@@ -161,7 +161,7 @@
       };
       listenTo__Base = function(pub, sub, event, callback, once) {
         var base, cb, listening, name, name1, record;
-        cb = once ? onceWrap(pub, sub, event, callback) : callback;
+        cb = once === true ? onceWrap(pub, sub, event, callback) : callback;
         ((base = (pub._ps != null ? pub._ps : pub._ps = {}))[name = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event] != null ? base[name] : base[name] = []).push(sub, cb, sub);
         listening = (sub._psTo != null ? sub._psTo : sub._psTo = {});
         record = (listening[name1 = pub.oid != null ? pub.oid : pub.oid = generateOID()] != null ? listening[name1] : listening[name1] = [pub, 0]);
@@ -193,7 +193,7 @@
           listenTo__EventString(pub, sub, events, (typeof hash[events] === 'string' ? sub[hash[events]] : hash[events]), once);
         }
       };
-      ref1 = {
+      ref2 = {
         listenTo: false,
         listenToOnce: true
       };
@@ -209,9 +209,9 @@
           return this;
         };
       };
-      for (k in ref1) {
-        if (!hasProp.call(ref1, k)) continue;
-        v = ref1[k];
+      for (k in ref2) {
+        if (!hasProp.call(ref2, k)) continue;
+        v = ref2[k];
         fn(k, v);
       }
     })();
@@ -234,7 +234,7 @@
         n = 0;
         ps = pub._ps;
         fevent = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event;
-        if (ps && (entries = ps[fevent])) {
+        if ((ps != null) && ((entries = ps[fevent]) != null)) {
           l = entries.length;
           n += l;
           if (l > 2) {
@@ -253,7 +253,7 @@
         n = 0;
         for (event in ps) {
           entries = ps[event];
-          if (!(entries)) {
+          if (!(entries != null)) {
             continue;
           }
           l = entries.length;
@@ -269,10 +269,10 @@
         }
       };
       stopListening__Everything = function(sub) {
-        var oid, pair, ref1;
-        ref1 = sub._psTo;
-        for (oid in ref1) {
-          pair = ref1[oid];
+        var oid, pair, ref2;
+        ref2 = sub._psTo;
+        for (oid in ref2) {
+          pair = ref2[oid];
           stopListening__Everything__Iteration(pair[0], sub);
         }
       };
@@ -293,11 +293,11 @@
         }
       };
       stopListening__EventString__Iteration = function(pub, sub, event, callback) {
-        var oid, pair, ref1;
-        ref1 = sub._psTo;
-        for (oid in ref1) {
-          pair = ref1[oid];
-          if (!pub || pair[0] === pub) {
+        var oid, pair, ref2;
+        ref2 = sub._psTo;
+        for (oid in ref2) {
+          pair = ref2[oid];
+          if ((pub == null) || pair[0] === pub) {
             stopListening__Base(pair[0], sub, event, callback);
           }
         }
@@ -311,11 +311,11 @@
         }
       };
       stopListening__AnyEvent = function(pub, sub, callback) {
-        var event, ipub, oid, pair, ref1;
-        ref1 = sub._psTo;
-        for (oid in ref1) {
-          pair = ref1[oid];
-          if (!pub || (ipub = pair[0]) === pub) {
+        var event, ipub, oid, pair, ref2;
+        ref2 = sub._psTo;
+        for (oid in ref2) {
+          pair = ref2[oid];
+          if ((pub == null) || (ipub = pair[0]) === pub) {
             for (event in ipub._ps) {
               stopListening__Base(ipub, sub, event, callback);
             }
@@ -323,10 +323,10 @@
         }
       };
       PS.stopListening = function(object, events, callback) {
-        if (this._psTo) {
-          if (!object && !events && !callback) {
+        if (this._psTo != null) {
+          if ((object == null) && (events == null) && (callback == null)) {
             stopListening__Everything(this);
-          } else if (events) {
+          } else if (events != null) {
             if (typeof events === 'string') {
               stopListening__EventString(object, this, events, (typeof callback === 'string' ? this[callback] : callback));
             } else {
@@ -379,16 +379,21 @@
         }
       };
       triggerEvent = function(ps, event, args) {
-        var allList, list;
+        var allList, el, len1, list, m, ref;
         list = ps[event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event];
         allList = ps.all;
-        if (list) {
-          if (allList) {
-            allList = allList.slice();
+        if (list != null) {
+          if (allList != null) {
+            ref = allList;
+            allList = [];
+            for (m = 0, len1 = ref.length; m < len1; m++) {
+              el = ref[m];
+              allList.push(el);
+            }
           }
           runCallbacks(list, args);
         }
-        if (allList) {
+        if (allList != null) {
           args.unshift(event);
           runCallbacks(allList, args);
           args.shift();
@@ -412,14 +417,14 @@
       };
       PS.trigger = PS.notify = function(events) {
         var args, k, l, ps, space;
-        if ((ps = this._ps) && (l = arguments.length) > 0) {
-          if (space = (events.indexOf(' ') > -1) || ps[events.indexOf(':') > -1 ? events.replace(/:/g, '_') : events] || ps.all) {
+        if (((ps = this._ps) != null) && (l = arguments.length) > 0) {
+          if (space = (events.indexOf(' ') > -1) || (ps[events.indexOf(':') > -1 ? events.replace(/:/g, '_') : events] != null) || (ps.all != null)) {
             k = 0;
             args = [];
             while (++k < l) {
               args.push(arguments[k]);
             }
-            if (space) {
+            if (space === true) {
               triggerEachEvent(ps, events, args);
             } else {
               triggerEvent(ps, events, args);
@@ -434,7 +439,7 @@
       unbind__Base = function(object, event, cb, ctx) {
         var e, fevent, k, len, r, sub;
         fevent = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event;
-        if (!(e = object._ps[fevent])) {
+        if ((e = object._ps[fevent]) == null) {
           return;
         }
         if ((len = e.length) < 3) {
@@ -443,8 +448,8 @@
         r = null;
         k = -1;
         while ((k += 3) < len) {
-          if ((!cb || (cb === e[k - 1] || cb === e[k - 1]._cb)) && (!ctx || ctx === e[k])) {
-            if (sub = e[k - 2]) {
+          if (((cb == null) || (cb === e[k - 1] || cb === e[k - 1]._cb)) && ((ctx == null) || ctx === e[k])) {
+            if ((sub = e[k - 2]) != null) {
               decrementListeningCount(object, sub, 1);
             }
           } else {
@@ -476,14 +481,14 @@
         }
       };
       unbind__Everything = function(object) {
-        var entries, event, len1, m, ref1, sub;
-        ref1 = object._ps;
-        for (event in ref1) {
-          entries = ref1[event];
-          if (entries) {
+        var entries, event, len1, m, ref2, sub;
+        ref2 = object._ps;
+        for (event in ref2) {
+          entries = ref2[event];
+          if (entries != null) {
             for (m = 0, len1 = entries.length; m < len1; m += 3) {
               sub = entries[m];
-              if (sub) {
+              if (sub != null) {
                 decrementListeningCount(object, sub, 1);
               }
             }
@@ -499,9 +504,9 @@
       };
       PS.unbind = PS.off = function(events, callback, context) {
         if (this._ps) {
-          if (!events && !callback && !context) {
+          if ((events == null) && (callback == null) && (context == null)) {
             unbind__Everything(this);
-          } else if (events) {
+          } else if (events != null) {
             if (typeof events === 'string') {
               unbind__EventString(this, events, (typeof callback === 'string' ? this[callback] : callback), context);
             } else {
@@ -518,7 +523,13 @@
       VERSION: '1.0.3',
       isNoisy: isNoisy,
       isEventable: isEventable,
-      InstanceMembers: PS
+      InstanceMembers: PS,
+      included: function(Class) {
+        return typeof Class.initializer === "function" ? Class.initializer(function() {
+          this._ps = {};
+          this._psTo = {};
+        }) : void 0;
+      }
     };
   });
 

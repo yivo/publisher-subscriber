@@ -50,7 +50,7 @@
   decrementListeningCount = (pub, sub, n) ->
     oid       = pub.oid ?= generateOID()
     record    = sub._psTo[oid]
-    if record and (record[1] -= n | 0) < 1
+    if record? and (record[1] -= n | 0) < 1
       delete sub._psTo[oid]
     return
   
@@ -90,12 +90,12 @@
       wrapper
   
     bind__Base = (object, event, callback, context, once) ->
-      cb = if once then onceWrap(object, event, callback, context) else callback
+      cb = if once is true then onceWrap(object, event, callback, context) else callback
       ((object._ps ?= {})[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event] ?= []).push(undefined, cb, context)
   
     bind__EventString = (object, events, callback, context, once) ->
       if events.indexOf(' ') == -1
-        cb = (if once then onceWrap(object, events, callback, context) else callback);((object._ps ?= {})[if events.indexOf(':') > -1 then events.replace(/:/g, '_') else events] ?= []).push(undefined, cb, context)
+        cb = (if once is true then onceWrap(object, events, callback, context) else callback);((object._ps ?= {})[if events.indexOf(':') > -1 then events.replace(/:/g, '_') else events] ?= []).push(undefined, cb, context)
       else
         l = events.length
         i = -1
@@ -103,7 +103,7 @@
         while ++i <= l
           if i is l or events[i] is ' '
             if j > 0
-              event = events[i - j...i]; cb = (if once then onceWrap(object, event, callback, context) else callback);((object._ps ?= {})[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event] ?= []).push(undefined, cb, context)
+              event = events[i - j...i]; cb = (if once is true then onceWrap(object, event, callback, context) else callback);((object._ps ?= {})[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event] ?= []).push(undefined, cb, context)
               j = 0
           else ++j
       return
@@ -149,7 +149,7 @@
       wrapper
   
     listenTo__Base = (pub, sub, event, callback, once) ->
-      cb = if once then onceWrap(pub, sub, event, callback) else callback
+      cb = if once is true then onceWrap(pub, sub, event, callback) else callback
       ((pub._ps ?= {})[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event] ?= []).push(sub, cb, sub)
       listening = (sub._psTo ?= {}); record = (listening[pub.oid ?= generateOID()] ?= [pub, 0]); record[1] += 1;
       return
@@ -205,7 +205,7 @@
       ps      = pub._ps
       fevent  = if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event
   
-      if ps and (entries = ps[fevent])
+      if ps? and (entries = ps[fevent])?
         l  = entries.length
         n += l
         if l > 2
@@ -218,7 +218,7 @@
     stopListening__Everything__Iteration = (pub, sub) ->
       ps    = pub._ps
       n     = 0
-      for event, entries of ps when entries
+      for event, entries of ps when entries?
         l  = entries.length
         n += l
         if l > 2
@@ -246,7 +246,7 @@
       return
   
     stopListening__EventString__Iteration = (pub, sub, event, callback) ->
-      for oid, pair of sub._psTo when !pub or pair[0] is pub
+      for oid, pair of sub._psTo when !pub? or pair[0] is pub
         stopListening__Base(pair[0], sub, event, callback)
       return
   
@@ -256,17 +256,17 @@
       return
   
     stopListening__AnyEvent = (pub, sub, callback) ->
-      for oid, pair of sub._psTo when !pub or (ipub = pair[0]) is pub
+      for oid, pair of sub._psTo when !pub? or (ipub = pair[0]) is pub
         for event of ipub._ps
           stopListening__Base(ipub, sub, event, callback)
       return
   
     PS.stopListening = (object, events, callback) ->
-      if @_psTo
-        if !object and !events and !callback
+      if @_psTo?
+        if !object? and !events? and !callback?
           stopListening__Everything(this)
   
-        else if events
+        else if events?
           if typeof events is 'string'
             stopListening__EventString(object, this, events, (if typeof callback is 'string' then this[callback] else callback))
           else
@@ -300,11 +300,15 @@
       list    = ps[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event]
       allList = ps.all
   
-      if list
-        allList = allList.slice() if allList
+      if list?
+        if allList?
+          ref = allList
+          allList = []
+          allList.push(el) for el in ref
+  
         runCallbacks(list, args)
   
-      if allList
+      if allList?
         args.unshift(event)
         runCallbacks(allList, args)
         args.shift()
@@ -323,16 +327,16 @@
       return
   
     PS.trigger = PS.notify = (events) ->
-      if (ps = @_ps) and (l = arguments.length) > 0
+      if (ps = @_ps)? and (l = arguments.length) > 0
   
         # If space-separated events
         # or there entries for [event]
         # or there entries for `all` event
-        if space = (events.indexOf(' ') > -1) or ps[if events.indexOf(':') > -1 then events.replace(/:/g, '_') else events] or ps.all
+        if space = (events.indexOf(' ') > -1) or ps[if events.indexOf(':') > -1 then events.replace(/:/g, '_') else events]? or ps.all?
           k           = 0
           args        = []
           args.push(arguments[k]) while ++k < l
-          if space
+          if space is true
             triggerEachEvent(ps, events, args)
           else
             triggerEvent(ps, events, args)
@@ -342,7 +346,7 @@
   do ->
     unbind__Base = (object, event, cb, ctx) ->
       fevent = if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event
-      return if not e = object._ps[fevent]
+      return unless (e = object._ps[fevent])?
       return if (len = e.length) < 3
   
       r = null
@@ -350,9 +354,9 @@
   
       while (k += 3) < len
   
-        if (!cb or cb in [e[k-1], e[k-1]._cb]) and (!ctx or ctx is e[k])
+        if (!cb? or cb in [e[k-1], e[k-1]._cb]) and (!ctx? or ctx is e[k])
           # Omit!
-          decrementListeningCount(object, sub, 1) if sub = e[k-2]
+          decrementListeningCount(object, sub, 1) if (sub = e[k-2])?
   
         else
           (r ?= []).push(e[k-2], e[k-1], e[k])
@@ -378,8 +382,8 @@
       return
   
     unbind__Everything = (object) ->
-      for event, entries of object._ps when entries
-        for sub in entries by 3 when sub
+      for event, entries of object._ps when entries?
+        for sub in entries by 3 when sub?
           decrementListeningCount(object, sub, 1)
       object._ps = null
       return
@@ -391,10 +395,10 @@
   
     PS.unbind = PS.off = (events, callback, context) ->
       if @_ps
-        if !events and !callback and !context
+        if !events? and !callback? and !context?
           unbind__Everything(this)
   
-        else if events
+        else if events?
           if typeof events is 'string'
             unbind__EventString(this, events, (if typeof callback is 'string' then this[callback] else callback), context)
           else
@@ -410,7 +414,6 @@
   isNoisy:         isNoisy
   isEventable:     isEventable
   InstanceMembers: PS
-  #included:        (Class) ->
-  #                   Class.initializer? -> @_ps = {}; @_psTo = {}; return
+  included:        (Class) -> Class.initializer? -> @_ps = {}; @_psTo = {}; return
   
 )

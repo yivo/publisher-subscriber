@@ -11,8 +11,8 @@ do ->
     wrapper
 
   listenTo__Base = (pub, sub, event, callback, once) ->
-    cb = if once then onceWrap(pub, sub, event, callback) else callback
-    ((pub._ps ||= {})[fastProperty(event)] ||= []).push(sub, cb, sub)
+    cb = if once is true then onceWrap(pub, sub, event, callback) else callback
+    ((pub._ps ?= {})[fastProperty(event)] ?= []).push(sub, cb, sub)
     increaseListeningCount(pub, sub)
     return
 

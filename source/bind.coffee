@@ -11,8 +11,8 @@ do ->
     wrapper
 
   bind__Base = (object, event, callback, context, once) ->
-    cb = if once then onceWrap(object, event, callback, context) else callback
-    ((object._ps ||= {})[fastProperty(event)] ||= []).push(undefined, cb, context)
+    cb = if once is true then onceWrap(object, event, callback, context) else callback
+    ((object._ps ?= {})[fastProperty(event)] ?= []).push(undefined, cb, context)
 
   bind__EventString = (object, events, callback, context, once) ->
     if events.indexOf(' ') == -1

@@ -14,7 +14,7 @@ do ->
     ps      = pub._ps
     fevent  = fastProperty(event)
 
-    if ps and (entries = ps[fevent])
+    if ps? and (entries = ps[fevent])?
       l  = entries.length
       n += l
       if l > 2
@@ -27,7 +27,7 @@ do ->
   stopListening__Everything__Iteration = (pub, sub) ->
     ps    = pub._ps
     n     = 0
-    for event, entries of ps when entries
+    for event, entries of ps when entries?
       l  = entries.length
       n += l
       if l > 2
@@ -55,7 +55,7 @@ do ->
     return
 
   stopListening__EventString__Iteration = (pub, sub, event, callback) ->
-    for oid, pair of sub._psTo when !pub or pair[0] is pub
+    for oid, pair of sub._psTo when !pub? or pair[0] is pub
       stopListening__Base(pair[0], sub, event, callback)
     return
 
@@ -65,17 +65,17 @@ do ->
     return
 
   stopListening__AnyEvent = (pub, sub, callback) ->
-    for oid, pair of sub._psTo when !pub or (ipub = pair[0]) is pub
+    for oid, pair of sub._psTo when !pub? or (ipub = pair[0]) is pub
       for event of ipub._ps
         stopListening__Base(ipub, sub, event, callback)
     return
 
   PS.stopListening = (object, events, callback) ->
-    if @_psTo
-      if !object and !events and !callback
+    if @_psTo?
+      if !object? and !events? and !callback?
         stopListening__Everything(this)
 
-      else if events
+      else if events?
         if typeof events is 'string'
           stopListening__EventString(object, this, events, resolveCallback(this, callback))
         else

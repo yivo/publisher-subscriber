@@ -1,7 +1,7 @@
 do ->
   unbind__Base = (object, event, cb, ctx) ->
     fevent = fastProperty(event)
-    return if not e = object._ps[fevent]
+    return unless (e = object._ps[fevent])?
     return if (len = e.length) < 3
 
     r = null
@@ -9,12 +9,12 @@ do ->
 
     while (k += 3) < len
 
-      if (!cb or cb in [e[k-1], e[k-1]._cb]) and (!ctx or ctx is e[k])
+      if (!cb? or cb in [e[k-1], e[k-1]._cb]) and (!ctx? or ctx is e[k])
         # Omit!
-        decrementListeningCount(object, sub, 1) if sub = e[k-2]
+        decrementListeningCount(object, sub, 1) if (sub = e[k-2])?
 
       else
-        (r ||= []).push(e[k-2], e[k-1], e[k])
+        (r ?= []).push(e[k-2], e[k-1], e[k])
 
     object._ps[fevent] = r
     return
@@ -37,8 +37,8 @@ do ->
     return
 
   unbind__Everything = (object) ->
-    for event, entries of object._ps when entries
-      for sub in entries by 3 when sub
+    for event, entries of object._ps when entries?
+      for sub in entries by 3 when sub?
         decrementListeningCount(object, sub, 1)
     object._ps = null
     return
@@ -50,10 +50,10 @@ do ->
 
   PS.unbind = PS.off = (events, callback, context) ->
     if @_ps
-      if !events and !callback and !context
+      if !events? and !callback? and !context?
         unbind__Everything(this)
 
-      else if events
+      else if events?
         if typeof events is 'string'
           unbind__EventString(this, events, resolveCallback(this, callback), context)
         else
