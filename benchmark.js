@@ -1,6 +1,6 @@
 var _                   = require('lodash');
-var PublisherSubscriber = require('./build/publisher-subscriber.js').InstanceMembers;
-var BackboneEvents      = require('backbone').Events;
+var PublisherSubscriber = require('./build/publisher-subscriber.min.js').InstanceMembers;
+var BackboneEvents      = require('./node_modules/backbone/backbone-min.js').Events;
 var Benchmark           = require('benchmark');
 
 function nop() {}
