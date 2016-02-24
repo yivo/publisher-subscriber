@@ -527,8 +527,12 @@
       included: function(Class) {
         if (typeof Class.initializer === "function") {
           Class.initializer('publisher-subscriber', function() {
-            this._2 = {};
-            this._3 = {};
+            if (this._2 == null) {
+              this._2 = {};
+            }
+            if (this._3 == null) {
+              this._3 = {};
+            }
           });
         }
       }

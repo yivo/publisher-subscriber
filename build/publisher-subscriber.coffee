@@ -415,7 +415,7 @@
   isEventable:     isEventable
   InstanceMembers: PS
   included:        (Class) ->
-    Class.initializer? 'publisher-subscriber', -> @_2 = {}; @_3 = {}; return
+    Class.initializer? 'publisher-subscriber', -> @_2 ?= {}; @_3 ?= {}; return
     return
   
 )
