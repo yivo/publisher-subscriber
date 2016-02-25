@@ -80,15 +80,14 @@
         return wrapper;
       };
       bind__Base = function(object, event, callback, context, once) {
-        var base, cb, name;
+        var base, cb;
         cb = once === true ? onceWrap(object, event, callback, context) : callback;
-        return ((base = (object._2 != null ? object._2 : object._2 = {}))[name = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event] != null ? base[name] : base[name] = []).push(void 0, cb, context);
+        return ((base = (object._2 != null ? object._2 : object._2 = {}))[event] != null ? base[event] : base[event] = []).push(void 0, cb, context);
       };
       bind__EventString = function(object, events, callback, context, once) {
-        var base, base1, cb, event, i, j, l, name, name1;
+        var i, j, l;
         if (events.indexOf(' ') === -1) {
-          cb = (once === true ? onceWrap(object, events, callback, context) : callback);
-          ((base = (object._2 != null ? object._2 : object._2 = {}))[name = events.indexOf(':') > -1 ? events.replace(/:/g, '_') : events] != null ? base[name] : base[name] = []).push(void 0, cb, context);
+          bind__Base(object, events, callback, context, once);
         } else {
           l = events.length;
           i = -1;
@@ -96,9 +95,7 @@
           while (++i <= l) {
             if (i === l || events[i] === ' ') {
               if (j > 0) {
-                event = events.slice(i - j, i);
-                cb = (once === true ? onceWrap(object, event, callback, context) : callback);
-                ((base1 = (object._2 != null ? object._2 : object._2 = {}))[name1 = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event] != null ? base1[name1] : base1[name1] = []).push(void 0, cb, context);
+                bind__Base(object, events.slice(i - j, i), callback, context, once);
                 j = 0;
               }
             } else {
@@ -160,12 +157,10 @@
         return wrapper;
       };
       listenTo__Base = function(pub, sub, event, callback, once) {
-        var base, cb, listening, name, name1, record;
+        var base, cb;
         cb = once === true ? onceWrap(pub, sub, event, callback) : callback;
-        ((base = (pub._2 != null ? pub._2 : pub._2 = {}))[name = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event] != null ? base[name] : base[name] = []).push(sub, cb, sub);
-        listening = (sub._3 != null ? sub._3 : sub._3 = {});
-        record = (listening[name1 = pub.oid != null ? pub.oid : pub.oid = generateOID()] != null ? listening[name1] : listening[name1] = [pub, 0]);
-        record[1] += 1;
+        ((base = (pub._2 != null ? pub._2 : pub._2 = {}))[event] != null ? base[event] : base[event] = []).push(sub, cb, sub);
+        increaseListeningCount(pub, sub);
       };
       listenTo__EventString = function(pub, sub, events, callback, once) {
         var i, j, l;
@@ -233,7 +228,7 @@
         var entries, fevent, filtered, l, n, ps;
         n = 0;
         ps = pub._2;
-        fevent = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event;
+        fevent = event;
         if ((ps != null) && ((entries = ps[fevent]) != null)) {
           l = entries.length;
           n += l;
@@ -380,7 +375,7 @@
       };
       triggerEvent = function(ps, event, args) {
         var allList, el, len1, list, m, ref;
-        list = ps[event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event];
+        list = ps[event];
         allList = ps.all;
         if (list != null) {
           if (allList != null) {
@@ -418,7 +413,7 @@
       PS.trigger = PS.notify = function(events) {
         var args, k, l, ps, space;
         if (((ps = this._2) != null) && (l = arguments.length) > 0) {
-          if (space = (events.indexOf(' ') > -1) || (ps[events.indexOf(':') > -1 ? events.replace(/:/g, '_') : events] != null) || (ps.all != null)) {
+          if (space = (events.indexOf(' ') > -1) || (ps[events] != null) || (ps.all != null)) {
             k = 0;
             args = [];
             while (++k < l) {
@@ -438,7 +433,7 @@
       var unbind__AnyEvent, unbind__Base, unbind__EventMap, unbind__EventString, unbind__Everything;
       unbind__Base = function(object, event, cb, ctx) {
         var e, fevent, k, len, r, sub;
-        fevent = event.indexOf(':') > -1 ? event.replace(/:/g, '_') : event;
+        fevent = event;
         if ((e = object._2[fevent]) == null) {
           return;
         }
@@ -520,7 +515,7 @@
       };
     })();
     return {
-      VERSION: '1.0.5',
+      VERSION: '1.0.6',
       isNoisy: isNoisy,
       isEventable: isEventable,
       InstanceMembers: PS,

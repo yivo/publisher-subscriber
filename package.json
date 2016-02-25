@@ -1,11 +1,11 @@
 {
   "name": "publisher-subscriber",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Lightning fast Publisher-Subscriber pattern written in CoffeeScript. Compatible with Backbone.Events",
   "main": "build/publisher-subscriber.js",
   "scripts": {
     "test": "gulp build && jasmine",
-    "bench": "gulp build && node benchmark.js"
+    "bench": "gulp build-min && node benchmark.js"
   },
   "author": "Yaroslav Konoplov <yaroslav@inbox.com>",
   "repository": {
@@ -24,8 +24,8 @@
     "gulp-concat": "^2.2.0",
     "gulp-connect": "^2.0.5",
     "gulp-ejs": "^1.2.1",
-    "gulp-iife": "git://github.com/yivo/gulp-iife",
-    "gulp-lazyload": "git://github.com/yivo/gulp-lazyload",
+    "gulp-iife-wrap": "^1.0.2",
+    "gulp-lazyload": "yivo/gulp-lazyload",
     "gulp-plumber": "^1.0.0",
     "gulp-preprocess": "^1.2.0",
     "gulp-rename": "^1.2.2",

@@ -91,11 +91,11 @@
   
     bind__Base = (object, event, callback, context, once) ->
       cb = if once is true then onceWrap(object, event, callback, context) else callback
-      ((object._2 ?= {})[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event] ?= []).push(undefined, cb, context)
+      ((object._2 ?= {})[event] ?= []).push(undefined, cb, context)
   
     bind__EventString = (object, events, callback, context, once) ->
       if events.indexOf(' ') == -1
-        cb = (if once is true then onceWrap(object, events, callback, context) else callback);((object._2 ?= {})[if events.indexOf(':') > -1 then events.replace(/:/g, '_') else events] ?= []).push(undefined, cb, context)
+        bind__Base(object, events, callback, context, once)
       else
         l = events.length
         i = -1
@@ -103,7 +103,7 @@
         while ++i <= l
           if i is l or events[i] is ' '
             if j > 0
-              event = events[i - j...i]; cb = (if once is true then onceWrap(object, event, callback, context) else callback);((object._2 ?= {})[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event] ?= []).push(undefined, cb, context)
+              bind__Base(object, events[i - j...i], callback, context, once)
               j = 0
           else ++j
       return
@@ -150,8 +150,8 @@
   
     listenTo__Base = (pub, sub, event, callback, once) ->
       cb = if once is true then onceWrap(pub, sub, event, callback) else callback
-      ((pub._2 ?= {})[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event] ?= []).push(sub, cb, sub)
-      listening = (sub._3 ?= {}); record = (listening[pub.oid ?= generateOID()] ?= [pub, 0]); record[1] += 1;
+      ((pub._2 ?= {})[event] ?= []).push(sub, cb, sub)
+      increaseListeningCount(pub, sub)
       return
   
     listenTo__EventString = (pub, sub, events, callback, once) ->
@@ -203,7 +203,7 @@
     stopListening__Base = (pub, sub, event, callback) ->
       n       = 0
       ps      = pub._2
-      fevent  = if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event
+      fevent  = event
   
       if ps? and (entries = ps[fevent])?
         l  = entries.length
@@ -297,7 +297,7 @@
       return
   
     triggerEvent = (ps, event, args) ->
-      list    = ps[if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event]
+      list    = ps[event]
       allList = ps.all
   
       if list?
@@ -332,7 +332,7 @@
         # If space-separated events
         # or there entries for [event]
         # or there entries for `all` event
-        if space = (events.indexOf(' ') > -1) or ps[if events.indexOf(':') > -1 then events.replace(/:/g, '_') else events]? or ps.all?
+        if space = (events.indexOf(' ') > -1) or ps[events]? or ps.all?
           k           = 0
           args        = []
           args.push(arguments[k]) while ++k < l
@@ -345,7 +345,7 @@
   
   do ->
     unbind__Base = (object, event, cb, ctx) ->
-      fevent = if event.indexOf(':') > -1 then event.replace(/:/g, '_') else event
+      fevent = event
       return unless (e = object._2[fevent])?
       return if (len = e.length) < 3
   
@@ -410,7 +410,7 @@
     return
   
   
-  VERSION:         '1.0.5'
+  VERSION:         '1.0.6'
   isNoisy:         isNoisy
   isEventable:     isEventable
   InstanceMembers: PS
