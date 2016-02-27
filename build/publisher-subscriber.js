@@ -338,14 +338,17 @@
       var runCallbacks, triggerEachEvent, triggerEvent;
       runCallbacks = function(array, args) {
         var arg1, arg2, arg3, i, len;
-        if (array.length === 0) {
-          return;
-        }
         i = -1;
         len = array.length;
-        arg1 = len > 0 && args[0];
-        arg2 = len > 1 && args[1];
-        arg3 = len > 2 && args[2];
+        if (len > 0) {
+          arg1 = args[0];
+        }
+        if (len > 1) {
+          arg2 = args[1];
+        }
+        if (len > 2) {
+          arg3 = args[2];
+        }
         switch (args.length) {
           case 0:
             while ((i += 3) < len) {
@@ -377,7 +380,7 @@
         var allList, el, len1, list, m, ref;
         list = ps[event];
         allList = ps.all;
-        if (list != null) {
+        if ((list != null ? list.length : void 0) > 0) {
           if (allList != null) {
             ref = allList;
             allList = [];
@@ -388,7 +391,7 @@
           }
           runCallbacks(list, args);
         }
-        if (allList != null) {
+        if ((allList != null ? allList.length : void 0) > 0) {
           args.unshift(event);
           runCallbacks(allList, args);
           args.shift();
@@ -515,7 +518,7 @@
       };
     })();
     return {
-      VERSION: '1.0.6',
+      VERSION: '1.0.7',
       isNoisy: isNoisy,
       isEventable: isEventable,
       InstanceMembers: PS,

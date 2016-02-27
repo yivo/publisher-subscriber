@@ -1,11 +1,10 @@
 do ->
   runCallbacks = (array, args) ->
-    return if array.length is 0
     i    = -1
     len  = array.length
-    arg1 = len > 0 and args[0]
-    arg2 = len > 1 and args[1]
-    arg3 = len > 2 and args[2]
+    arg1 = args[0] if len > 0
+    arg2 = args[1] if len > 1
+    arg3 = args[2] if len > 2
 
     switch args.length
       when 0 then array[i - 1].call(array[i])                     while (i += 3) < len
@@ -19,15 +18,14 @@ do ->
     list    = ps[fastProperty(event)]
     allList = ps.all
 
-    if list?
+    if list?.length > 0
       if allList?
         ref = allList
         allList = []
         allList.push(el) for el in ref
-
       runCallbacks(list, args)
 
-    if allList?
+    if allList?.length > 0
       args.unshift(event)
       runCallbacks(allList, args)
       args.shift()
