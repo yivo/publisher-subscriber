@@ -1,7 +1,6 @@
 do ->
   unbind__Base = (object, event, cb, ctx) ->
-    fevent = fastProperty(event)
-    return unless (e = object._ps[fevent])?
+    return unless (e = object._ps[event])?
     return if (len = e.length) < 3
 
     r = null
@@ -16,7 +15,7 @@ do ->
       else
         (r ?= []).push(e[k-2], e[k-1], e[k])
 
-    object._ps[fevent] = r
+    object._ps[event] = r
     return
 
   unbind__EventString = (object, events, callback, context) ->
@@ -57,7 +56,7 @@ do ->
         if typeof events is 'string'
           unbind__EventString(this, events, resolveCallback(this, callback), context)
         else
-          unbind__EventMap(this, events, context or callback)
+          unbind__EventMap(this, events, context ? callback)
 
       else
         unbind__AnyEvent(this, callback, context)

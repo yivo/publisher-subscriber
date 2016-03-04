@@ -1,15 +1,11 @@
-generateOID = __root__._?.generateID or do ->
+generateOID = __root__._?.generateID ? do ->
   n = 0
   -> ++n
 
-getOID = (object) ->
-  object.oid ?= generateOID()
+getOID = (object) -> object.oid ?= generateOID()
 
 resolveCallback = (object, callback) ->
-  if typeof callback is 'string'
-    object[callback]
-  else
-    callback
+  if typeof callback is 'string' then object[callback] else callback
 
 increaseListeningCount = (pub, sub) ->
   listening = (sub._psTo ?= {})

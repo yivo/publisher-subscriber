@@ -28,18 +28,14 @@
 )((__root__) ->
   PS = {}
   
-  generateOID = __root__._?.generateID or do ->
+  generateOID = __root__._?.generateID ? do ->
     n = 0
     -> ++n
   
-  getOID = (object) ->
-    object.oid ?= generateOID()
+  getOID = (object) -> object.oid ?= generateOID()
   
   resolveCallback = (object, callback) ->
-    if typeof callback is 'string'
-      object[callback]
-    else
-      callback
+    if typeof callback is 'string' then object[callback] else callback
   
   increaseListeningCount = (pub, sub) ->
     listening = (sub._3 ?= {})
@@ -81,7 +77,7 @@
     onceWrap = (pub, event, callback, context) ->
       run     = false
       wrapper = ->
-        if not run
+        if run is false
           run = true
           pub.off(event, wrapper, context)
           callback.apply(context, arguments)
@@ -92,6 +88,7 @@
     bind__Base = (object, event, callback, context, once) ->
       cb = if once is true then onceWrap(object, event, callback, context) else callback
       ((object._2 ?= {})[event] ?= []).push(undefined, cb, context)
+      return
   
     bind__EventString = (object, events, callback, context, once) ->
       if events.indexOf(' ') == -1
@@ -126,10 +123,10 @@
           if typeof events is 'string'
   
             if callback # Added here for spec: "if no callback is provided, `on` is a noop"
-              bind__EventString(this, events, (if typeof callback is 'string' then this[callback] else callback), context or this, once)
+              bind__EventString(this, events, (if typeof callback is 'string' then this[callback] else callback), context ? this, once)
   
           else
-            bind__EventMap(this, events, context or callback or this, once)
+            bind__EventMap(this, events, context ? callback ? this, once)
           this
   
     PS.on   = PS.bind
@@ -140,7 +137,7 @@
     onceWrap = (pub, sub, event, callback) ->
       run     = false
       wrapper = ->
-        if not run
+        if run is false
           run = true
           sub.stopListening(pub, event, wrapper)
           callback.apply(sub, arguments)
@@ -203,15 +200,14 @@
     stopListening__Base = (pub, sub, event, callback) ->
       n       = 0
       ps      = pub._2
-      fevent  = event
   
-      if ps? and (entries = ps[fevent])?
+      if ps? and (entries = ps[event])?
         l  = entries.length
         n += l
         if l > 2
           filtered = filterEntries(entries, sub, callback)
           n       -= filtered.length
-        ps[fevent] = filtered
+        ps[event] = filtered
         decrementListeningCount(pub, sub, n / 3) if n > 0
       return
   
@@ -299,14 +295,14 @@
       list    = ps[event]
       allList = ps.all
   
-      if list?.length > 0
-        if allList?
-          ref = allList
+      if list? and list.length > 0
+        if allList? and allList.length > 0
+          ref     = allList
           allList = []
           allList.push(el) for el in ref
         runCallbacks(list, args)
   
-      if allList?.length > 0
+      if allList? and allList.length > 0
         args.unshift(event)
         runCallbacks(allList, args)
         args.shift()
@@ -330,11 +326,12 @@
         # If space-separated events
         # or there entries for [event]
         # or there entries for `all` event
-        if space = (events.indexOf(' ') > -1) or ps[events]? or ps.all?
+        if (idx = events.indexOf(' ')) > -1 or
+              ((ref1 = ps[events])? and ref1.length > 0) or ((ref2 = ps.all)? and ref2.length > 0)
           k           = 0
           args        = []
           args.push(arguments[k]) while ++k < l
-          if space is true
+          if idx > -1
             triggerEachEvent(ps, events, args)
           else
             triggerEvent(ps, events, args)
@@ -343,8 +340,7 @@
   
   do ->
     unbind__Base = (object, event, cb, ctx) ->
-      fevent = event
-      return unless (e = object._2[fevent])?
+      return unless (e = object._2[event])?
       return if (len = e.length) < 3
   
       r = null
@@ -359,7 +355,7 @@
         else
           (r ?= []).push(e[k-2], e[k-1], e[k])
   
-      object._2[fevent] = r
+      object._2[event] = r
       return
   
     unbind__EventString = (object, events, callback, context) ->
@@ -400,7 +396,7 @@
           if typeof events is 'string'
             unbind__EventString(this, events, (if typeof callback is 'string' then this[callback] else callback), context)
           else
-            unbind__EventMap(this, events, context or callback)
+            unbind__EventMap(this, events, context ? callback)
   
         else
           unbind__AnyEvent(this, callback, context)
@@ -408,11 +404,12 @@
     return
   
   
-  VERSION:         '1.0.7'
+  VERSION:         '1.0.8'
   isNoisy:         isNoisy
   isEventable:     isEventable
   InstanceMembers: PS
   included:        (Class) ->
-    Class.initializer? 'publisher-subscriber', -> @_2 ?= {}; @_3 ?= {}; return
+    Class.initializer? 'publisher-subscriber', ->
+      @oid ?= generateOID(); @_2 ?= {}; @_3 ?= {}; return
     return
 )

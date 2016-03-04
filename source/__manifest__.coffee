@@ -7,10 +7,11 @@ PS = {}
 # @include notify.coffee
 # @include unbind.coffee
 
-VERSION:         '1.0.7'
+VERSION:         '1.0.8'
 isNoisy:         isNoisy
 isEventable:     isEventable
 InstanceMembers: PS
 included:        (Class) ->
-  Class.initializer? 'publisher-subscriber', -> @_ps ?= {}; @_psTo ?= {}; return
+  Class.initializer? 'publisher-subscriber', ->
+    @oid ?= generateOID(); @_ps ?= {}; @_psTo ?= {}; return
   return

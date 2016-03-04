@@ -2,7 +2,7 @@ do ->
   onceWrap = (pub, sub, event, callback) ->
     run     = false
     wrapper = ->
-      if not run
+      if run is false
         run = true
         sub.stopListening(pub, event, wrapper)
         callback.apply(sub, arguments)
@@ -12,7 +12,7 @@ do ->
 
   listenTo__Base = (pub, sub, event, callback, once) ->
     cb = if once is true then onceWrap(pub, sub, event, callback) else callback
-    ((pub._ps ?= {})[fastProperty(event)] ?= []).push(sub, cb, sub)
+    ((pub._ps ?= {})[event] ?= []).push(sub, cb, sub)
     increaseListeningCount(pub, sub)
     return
 

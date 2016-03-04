@@ -2,7 +2,7 @@ do ->
   onceWrap = (pub, event, callback, context) ->
     run     = false
     wrapper = ->
-      if not run
+      if run is false
         run = true
         pub.off(event, wrapper, context)
         callback.apply(context, arguments)
@@ -12,7 +12,8 @@ do ->
 
   bind__Base = (object, event, callback, context, once) ->
     cb = if once is true then onceWrap(object, event, callback, context) else callback
-    ((object._ps ?= {})[fastProperty(event)] ?= []).push(undefined, cb, context)
+    ((object._ps ?= {})[event] ?= []).push(undefined, cb, context)
+    return
 
   bind__EventString = (object, events, callback, context, once) ->
     if events.indexOf(' ') == -1
@@ -47,10 +48,10 @@ do ->
         if typeof events is 'string'
 
           if callback # Added here for spec: "if no callback is provided, `on` is a noop"
-            bind__EventString(this, events, resolveCallback(this, callback), context or this, once)
+            bind__EventString(this, events, resolveCallback(this, callback), context ? this, once)
 
         else
-          bind__EventMap(this, events, context or callback or this, once)
+          bind__EventMap(this, events, context ? callback ? this, once)
         this
 
   PS.on   = PS.bind

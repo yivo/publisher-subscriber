@@ -551,6 +551,20 @@ describe('PublisherSubscriber', function() {
         expect(obj.counter).toBe(3);
     });
 
+    it('bind a callback with a supplied context using once with object notation', function() {
+        var obj = {counter: 0};
+        var context = {};
+        _.extend(obj, PublisherSubscriber.InstanceMembers);
+        obj.once({
+            a: function() {
+                ++obj.counter;
+                // defaults `context` to `callback` param
+                expect(this).toBe(context);
+            }
+        }, context).trigger('a');
+        expect(obj.counter).toBe(1);
+    });
+
     it("once with off only by context", function() {
         var context = {};
         var obj = _.extend({}, PublisherSubscriber.InstanceMembers);

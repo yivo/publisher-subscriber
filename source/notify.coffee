@@ -15,17 +15,17 @@ do ->
     return
 
   triggerEvent = (ps, event, args) ->
-    list    = ps[fastProperty(event)]
+    list    = ps[event]
     allList = ps.all
 
-    if list?.length > 0
-      if allList?
-        ref = allList
+    if list? and list.length > 0
+      if allList? and allList.length > 0
+        ref     = allList
         allList = []
         allList.push(el) for el in ref
       runCallbacks(list, args)
 
-    if allList?.length > 0
+    if allList? and allList.length > 0
       args.unshift(event)
       runCallbacks(allList, args)
       args.shift()
@@ -49,11 +49,12 @@ do ->
       # If space-separated events
       # or there entries for [event]
       # or there entries for `all` event
-      if space = (events.indexOf(' ') > -1) or ps[fastProperty(events)]? or ps.all?
+      if (idx = events.indexOf(' ')) > -1 or
+            ((ref1 = ps[events])? and ref1.length > 0) or ((ref2 = ps.all)? and ref2.length > 0)
         k           = 0
         args        = []
         args.push(arguments[k]) while ++k < l
-        if space is true
+        if idx > -1
           triggerEachEvent(ps, events, args)
         else
           triggerEvent(ps, events, args)

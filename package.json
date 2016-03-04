@@ -1,6 +1,6 @@
 {
   "name": "publisher-subscriber",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Lightning fast Publisher-Subscriber pattern written in CoffeeScript. Compatible with Backbone.Events",
   "main": "build/publisher-subscriber.js",
   "scripts": {

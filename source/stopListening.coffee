@@ -12,15 +12,14 @@ do ->
   stopListening__Base = (pub, sub, event, callback) ->
     n       = 0
     ps      = pub._ps
-    fevent  = fastProperty(event)
 
-    if ps? and (entries = ps[fevent])?
+    if ps? and (entries = ps[event])?
       l  = entries.length
       n += l
       if l > 2
         filtered = filterEntries(entries, sub, callback)
         n       -= filtered.length
-      ps[fevent] = filtered
+      ps[event] = filtered
       decrementListeningCount(pub, sub, n / 3) if n > 0
     return
 
