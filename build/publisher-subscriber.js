@@ -124,12 +124,14 @@
       fn = function(method, once) {
         return PS[method] = function(events, callback, context) {
           var ref6;
-          if (typeof events === 'string') {
-            if (callback) {
-              bind__EventString(this, events, (typeof callback === 'string' ? this[callback] : callback), context != null ? context : this, once);
+          if (events != null) {
+            if (typeof events === 'string') {
+              if (callback != null) {
+                bind__EventString(this, events, (typeof callback === 'string' ? this[callback] : callback), context != null ? context : this, once);
+              }
+            } else {
+              bind__EventMap(this, events, (ref6 = context != null ? context : callback) != null ? ref6 : this, once);
             }
-          } else {
-            bind__EventMap(this, events, (ref6 = context != null ? context : callback) != null ? ref6 : this, once);
           }
           return this;
         };
@@ -195,12 +197,14 @@
       };
       fn = function(method, once) {
         return PS[method] = function(object, events, callback) {
-          if (typeof events === 'string') {
-            if (callback) {
-              listenTo__EventString(object, this, events, (typeof callback === 'string' ? this[callback] : callback), once);
+          if (events != null) {
+            if (typeof events === 'string') {
+              if (callback != null) {
+                listenTo__EventString(object, this, events, (typeof callback === 'string' ? this[callback] : callback), once);
+              }
+            } else {
+              listenTo__EventMap(object, this, events, once);
             }
-          } else {
-            listenTo__EventMap(object, this, events, once);
           }
           return this;
         };
@@ -517,7 +521,7 @@
       };
     })();
     return {
-      VERSION: '1.0.8',
+      VERSION: '1.0.9',
       isNoisy: isNoisy,
       isEventable: isEventable,
       InstanceMembers: PS,

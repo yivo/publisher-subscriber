@@ -7,7 +7,7 @@ PS = {}
 # @include notify.coffee
 # @include unbind.coffee
 
-VERSION:         '1.0.8'
+VERSION:         '1.0.9'
 isNoisy:         isNoisy
 isEventable:     isEventable
 InstanceMembers: PS

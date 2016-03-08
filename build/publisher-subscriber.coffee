@@ -120,13 +120,14 @@
       do (method = k, once = v) ->
   
         PS[method] = (events, callback, context) ->
-          if typeof events is 'string'
+          if events?
+            if typeof events is 'string'
   
-            if callback # Added here for spec: "if no callback is provided, `on` is a noop"
-              bind__EventString(this, events, (if typeof callback is 'string' then this[callback] else callback), context ? this, once)
+              if callback? # Added here for spec: "if no callback is provided, `on` is a noop"
+                bind__EventString(this, events, (if typeof callback is 'string' then this[callback] else callback), context ? this, once)
   
-          else
-            bind__EventMap(this, events, context ? callback ? this, once)
+            else
+              bind__EventMap(this, events, context ? callback ? this, once)
           this
   
     PS.on   = PS.bind
@@ -175,13 +176,14 @@
       do (method = k, once = v) ->
   
         PS[method] = (object, events, callback) ->
-          if typeof events is 'string'
+          if events?
+            if typeof events is 'string'
   
-            if callback # Added here for spec: "listenTo with empty callback doesn't throw an error"
-              listenTo__EventString(object, this, events, (if typeof callback is 'string' then this[callback] else callback), once)
+              if callback? # Added here for spec: "listenTo with empty callback doesn't throw an error"
+                listenTo__EventString(object, this, events, (if typeof callback is 'string' then this[callback] else callback), once)
   
-          else
-            listenTo__EventMap(object, this, events, once)
+            else
+              listenTo__EventMap(object, this, events, once)
           this
   
     return
@@ -404,7 +406,7 @@
     return
   
   
-  VERSION:         '1.0.8'
+  VERSION:         '1.0.9'
   isNoisy:         isNoisy
   isEventable:     isEventable
   InstanceMembers: PS

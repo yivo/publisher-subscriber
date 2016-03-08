@@ -40,13 +40,14 @@ do ->
     do (method = k, once = v) ->
 
       PS[method] = (object, events, callback) ->
-        if typeof events is 'string'
+        if events?
+          if typeof events is 'string'
 
-          if callback # Added here for spec: "listenTo with empty callback doesn't throw an error"
-            listenTo__EventString(object, this, events, resolveCallback(this, callback), once)
+            if callback? # Added here for spec: "listenTo with empty callback doesn't throw an error"
+              listenTo__EventString(object, this, events, resolveCallback(this, callback), once)
 
-        else
-          listenTo__EventMap(object, this, events, once)
+          else
+            listenTo__EventMap(object, this, events, once)
         this
 
   return

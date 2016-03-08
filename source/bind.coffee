@@ -45,13 +45,14 @@ do ->
     do (method = k, once = v) ->
 
       PS[method] = (events, callback, context) ->
-        if typeof events is 'string'
+        if events?
+          if typeof events is 'string'
 
-          if callback # Added here for spec: "if no callback is provided, `on` is a noop"
-            bind__EventString(this, events, resolveCallback(this, callback), context ? this, once)
+            if callback? # Added here for spec: "if no callback is provided, `on` is a noop"
+              bind__EventString(this, events, resolveCallback(this, callback), context ? this, once)
 
-        else
-          bind__EventMap(this, events, context ? callback ? this, once)
+          else
+            bind__EventMap(this, events, context ? callback ? this, once)
         this
 
   PS.on   = PS.bind
