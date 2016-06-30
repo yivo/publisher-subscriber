@@ -1,3 +1,5 @@
+# TODO http://stackoverflow.com/questions/18640032/javascript-performance-while-vs-for-loops
+
 PS = {}
 
 # @include utils.coffee
