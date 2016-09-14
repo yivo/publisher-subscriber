@@ -1,21 +1,21 @@
 ((factory) ->
 
   # Browser and WebWorker
-  root = if typeof self is 'object' and self?.self is self
+  root = if typeof self is 'object' and self isnt null and self.self is self
     self
 
   # Server
-  else if typeof global is 'object' and global?.global is global
+  else if typeof global is 'object' and global isnt null and global.global is global
     global
 
   # AMD
-  if typeof define is 'function' and define.amd
+  if typeof define is 'function' and typeof define.amd is 'object' and define.amd isnt null
     root.PublisherSubscriber = factory(root)
     define -> root.PublisherSubscriber
 
   # CommonJS
   else if typeof module is 'object' and module isnt null and
-          module.exports? and typeof module.exports is 'object'
+          typeof module.exports is 'object' and module.exports isnt null
     module.exports = factory(root)
 
   # Browser and the rest
@@ -26,6 +26,8 @@
   return
 
 )((__root__) ->
+  # TODO http://stackoverflow.com/questions/18640032/javascript-performance-while-vs-for-loops
+  
   PS = {}
   
   generateOID = __root__._?.generateID ? do ->

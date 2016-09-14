@@ -3,13 +3,13 @@
 
   (function(factory) {
     var root;
-    root = typeof self === 'object' && (typeof self !== "undefined" && self !== null ? self.self : void 0) === self ? self : typeof global === 'object' && (typeof global !== "undefined" && global !== null ? global.global : void 0) === global ? global : void 0;
-    if (typeof define === 'function' && define.amd) {
+    root = typeof self === 'object' && self !== null && self.self === self ? self : typeof global === 'object' && global !== null && global.global === global ? global : void 0;
+    if (typeof define === 'function' && typeof define.amd === 'object' && define.amd !== null) {
       root.PublisherSubscriber = factory(root);
       define(function() {
         return root.PublisherSubscriber;
       });
-    } else if (typeof module === 'object' && module !== null && (module.exports != null) && typeof module.exports === 'object') {
+    } else if (typeof module === 'object' && module !== null && typeof module.exports === 'object' && module.exports !== null) {
       module.exports = factory(root);
     } else {
       root.PublisherSubscriber = factory(root);
