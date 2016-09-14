@@ -408,12 +408,8 @@
     return
   
   
-  VERSION:         '1.0.9'
+  VERSION:         '1.0.10'
   isNoisy:         isNoisy
   isEventable:     isEventable
   InstanceMembers: PS
-  included:        (Class) ->
-    Class.initializer? 'publisher-subscriber', ->
-      @oid ?= generateOID(); @_2 ?= {}; @_3 ?= {}; return
-    return
 )

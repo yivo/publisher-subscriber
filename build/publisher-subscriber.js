@@ -521,25 +521,10 @@
       };
     })();
     return {
-      VERSION: '1.0.9',
+      VERSION: '1.0.10',
       isNoisy: isNoisy,
       isEventable: isEventable,
-      InstanceMembers: PS,
-      included: function(Class) {
-        if (typeof Class.initializer === "function") {
-          Class.initializer('publisher-subscriber', function() {
-            if (this.oid == null) {
-              this.oid = generateOID();
-            }
-            if (this._2 == null) {
-              this._2 = {};
-            }
-            if (this._3 == null) {
-              this._3 = {};
-            }
-          });
-        }
-      }
+      InstanceMembers: PS
     };
   });
 

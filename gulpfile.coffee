@@ -1,13 +1,11 @@
 require('gulp-lazyload')
   gulp:       'gulp'
-  connect:    'gulp-connect'
   concat:     'gulp-concat'
   coffee:     'gulp-coffee'
   preprocess: 'gulp-preprocess'
   iife:       'gulp-iife-wrap'
   uglify:     'gulp-uglify'
   rename:     'gulp-rename'
-  del:        'del'
   plumber:    'gulp-plumber'
   ejs:        'gulp-ejs'
   replace:    'gulp-replace'
