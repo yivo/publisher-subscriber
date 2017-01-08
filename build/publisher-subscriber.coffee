@@ -26,8 +26,6 @@
   return
 
 )((__root__) ->
-  # TODO http://stackoverflow.com/questions/18640032/javascript-performance-while-vs-for-loops
-  
   PS = {}
   
   generateOID = __root__._?.generateID ? do ->
@@ -61,8 +59,7 @@
       prop
   
   # TODO Event list binding
-  isArrayLike = (obj) ->
-    obj? and typeof obj.length is 'number'
+  isArrayLike = (obj) -> obj? and typeof obj.length is 'number'
   
   isNoisy = (options) ->
     # null, undefined => true
@@ -72,8 +69,7 @@
     # {silent: *}     => !silent
     options != false && (options && options.silent) != true
   
-  isEventable = (obj) ->
-    obj && obj.on == PS.on
+  isEventable = (obj) -> obj?.on is PS.on
   
   do ->
     onceWrap = (pub, event, callback, context) ->
@@ -93,7 +89,7 @@
       return
   
     bind__EventString = (object, events, callback, context, once) ->
-      if events.indexOf(' ') == -1
+      if events.indexOf(' ') is -1
         bind__Base(object, events, callback, context, once)
       else
         l = events.length
@@ -155,7 +151,7 @@
       return
   
     listenTo__EventString = (pub, sub, events, callback, once) ->
-      if events.indexOf(' ') == -1
+      if events.indexOf(' ') is -1
         listenTo__Base(pub, sub, events, callback, once)
       else
         l = events.length
@@ -197,7 +193,7 @@
       k = -1
   
       while (k += 3) < l
-        if (sub isnt e[k-2]) or (cb and cb not in [e[k-1], e[k-1]._cb])
+        if (sub isnt e[k-2]) or (cb? and cb not in [e[k-1], e[k-1]._cb])
           r.push(e[k-2], e[k-1], e[k])
       r
   
@@ -222,7 +218,7 @@
         l  = entries.length
         n += l
         if l > 2
-          filtered = filterEntries(entries, sub)
+          filtered = filterEntries(entries, sub, null)
           n       -= filtered.length
         ps[event] = filtered
       decrementListeningCount(pub, sub, n / 3) if n > 0
@@ -281,32 +277,29 @@
   
   do ->
     runCallbacks = (array, args) ->
-      i    = -1
-      len  = array.length
-      arg1 = args[0] if len > 0
-      arg2 = args[1] if len > 1
-      arg3 = args[2] if len > 2
+      idx = -1
+      len = array.length
   
       switch args.length
-        when 0 then array[i - 1].call(array[i])                     while (i += 3) < len
-        when 1 then array[i - 1].call(array[i], arg1)               while (i += 3) < len
-        when 2 then array[i - 1].call(array[i], arg1, arg2)         while (i += 3) < len
-        when 3 then array[i - 1].call(array[i], arg1, arg2, arg3)   while (i += 3) < len
-        else        array[i - 1].apply(array[i], args)              while (i += 3) < len
+        when 0 then array[idx - 1].call(array[idx])                            while (idx += 3) < len
+        when 1 then array[idx - 1].call(array[idx], args[0])                   while (idx += 3) < len
+        when 2 then array[idx - 1].call(array[idx], args[0], args[1])          while (idx += 3) < len
+        when 3 then array[idx - 1].call(array[idx], args[0], args[1], args[2]) while (idx += 3) < len
+        else        array[idx - 1].apply(array[idx], args)                     while (idx += 3) < len
       return
   
     triggerEvent = (ps, event, args) ->
       list    = ps[event]
       allList = ps.all
   
-      if list? and list.length > 0
-        if allList? and allList.length > 0
+      if list?.length > 0
+        if allList?.length > 0
           ref     = allList
           allList = []
           allList.push(el) for el in ref
         runCallbacks(list, args)
   
-      if allList? and allList.length > 0
+      if allList?.length > 0
         args.unshift(event)
         runCallbacks(allList, args)
         args.shift()
@@ -330,8 +323,7 @@
         # If space-separated events
         # or there entries for [event]
         # or there entries for `all` event
-        if (idx = events.indexOf(' ')) > -1 or
-              ((ref1 = ps[events])? and ref1.length > 0) or ((ref2 = ps.all)? and ref2.length > 0)
+        if (idx = events.indexOf(' ')) > -1 or ps[events]?.length > 0 or ps.all?.length > 0
           k           = 0
           args        = []
           args.push(arguments[k]) while ++k < l
@@ -392,7 +384,7 @@
       return
   
     PS.unbind = PS.off = (events, callback, context) ->
-      if @_2
+      if @_2?
         if !events? and !callback? and !context?
           unbind__Everything(this)
   
@@ -412,4 +404,6 @@
   isNoisy:         isNoisy
   isEventable:     isEventable
   InstanceMembers: PS
+  
+  # TODO While loops: http://stackoverflow.com/questions/18640032/javascript-performance-while-vs-for-loops
 )
