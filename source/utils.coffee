@@ -29,8 +29,7 @@ fastProperty = (prop) ->
     prop
 
 # TODO Event list binding
-isArrayLike = (obj) ->
-  obj? and typeof obj.length is 'number'
+isArrayLike = (obj) -> obj? and typeof obj.length is 'number'
 
 isNoisy = (options) ->
   # null, undefined => true
@@ -40,5 +39,4 @@ isNoisy = (options) ->
   # {silent: *}     => !silent
   options != false && (options && options.silent) != true
 
-isEventable = (obj) ->
-  obj && obj.on == PS.on
+isEventable = (obj) -> obj?.on is PS.on

@@ -1,31 +1,28 @@
 do ->
   runCallbacks = (array, args) ->
-    i    = -1
-    len  = array.length
-    arg1 = args[0] if len > 0
-    arg2 = args[1] if len > 1
-    arg3 = args[2] if len > 2
+    idx = -1
+    len = array.length
 
     switch args.length
-      when 0 then array[i - 1].call(array[i])                     while (i += 3) < len
-      when 1 then array[i - 1].call(array[i], arg1)               while (i += 3) < len
-      when 2 then array[i - 1].call(array[i], arg1, arg2)         while (i += 3) < len
-      when 3 then array[i - 1].call(array[i], arg1, arg2, arg3)   while (i += 3) < len
-      else        array[i - 1].apply(array[i], args)              while (i += 3) < len
+      when 0 then array[idx - 1].call(array[idx])                            while (idx += 3) < len
+      when 1 then array[idx - 1].call(array[idx], args[0])                   while (idx += 3) < len
+      when 2 then array[idx - 1].call(array[idx], args[0], args[1])          while (idx += 3) < len
+      when 3 then array[idx - 1].call(array[idx], args[0], args[1], args[2]) while (idx += 3) < len
+      else        array[idx - 1].apply(array[idx], args)                     while (idx += 3) < len
     return
 
   triggerEvent = (ps, event, args) ->
     list    = ps[event]
     allList = ps.all
 
-    if list? and list.length > 0
-      if allList? and allList.length > 0
+    if list?.length > 0
+      if allList?.length > 0
         ref     = allList
         allList = []
         allList.push(el) for el in ref
       runCallbacks(list, args)
 
-    if allList? and allList.length > 0
+    if allList?.length > 0
       args.unshift(event)
       runCallbacks(allList, args)
       args.shift()
@@ -49,8 +46,7 @@ do ->
       # If space-separated events
       # or there entries for [event]
       # or there entries for `all` event
-      if (idx = events.indexOf(' ')) > -1 or
-            ((ref1 = ps[events])? and ref1.length > 0) or ((ref2 = ps.all)? and ref2.length > 0)
+      if (idx = events.indexOf(' ')) > -1 or ps[events]?.length > 0 or ps.all?.length > 0
         k           = 0
         args        = []
         args.push(arguments[k]) while ++k < l

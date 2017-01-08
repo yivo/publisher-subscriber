@@ -17,7 +17,7 @@ do ->
     return
 
   listenTo__EventString = (pub, sub, events, callback, once) ->
-    if events.indexOf(' ') == -1
+    if events.indexOf(' ') is -1
       listenTo__Base(pub, sub, events, callback, once)
     else
       l = events.length

@@ -48,7 +48,7 @@ do ->
     return
 
   PS.unbind = PS.off = (events, callback, context) ->
-    if @_ps
+    if @_ps?
       if !events? and !callback? and !context?
         unbind__Everything(this)
 

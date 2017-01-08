@@ -16,7 +16,7 @@ do ->
     return
 
   bind__EventString = (object, events, callback, context, once) ->
-    if events.indexOf(' ') == -1
+    if events.indexOf(' ') is -1
       bind__Base(object, events, callback, context, once)
     else
       l = events.length

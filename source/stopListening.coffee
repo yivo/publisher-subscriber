@@ -5,7 +5,7 @@ do ->
     k = -1
 
     while (k += 3) < l
-      if (sub isnt e[k-2]) or (cb and cb not in [e[k-1], e[k-1]._cb])
+      if (sub isnt e[k-2]) or (cb? and cb not in [e[k-1], e[k-1]._cb])
         r.push(e[k-2], e[k-1], e[k])
     r
 
@@ -30,7 +30,7 @@ do ->
       l  = entries.length
       n += l
       if l > 2
-        filtered = filterEntries(entries, sub)
+        filtered = filterEntries(entries, sub, null)
         n       -= filtered.length
       ps[event] = filtered
     decrementListeningCount(pub, sub, n / 3) if n > 0
