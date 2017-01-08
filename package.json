@@ -7,7 +7,7 @@
     "test": "gulp build && jasmine",
     "bench": "gulp build-min && node benchmark.js"
   },
-  "author": "Yaroslav Konoplov <yaroslav@inbox.com>",
+  "author": "Yaroslav Konoplov <eahome00@gmail.com>",
   "repository": {
     "type": "git",
     "url": "git://github.com/yivo/publisher-subscriber.git"
