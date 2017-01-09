@@ -28,9 +28,6 @@ fastProperty = (prop) ->
   else
     prop
 
-# TODO Event list binding
-isArrayLike = (obj) -> obj? and typeof obj.length is 'number'
-
 isNoisy = (options) ->
   # null, undefined => true
   # true            => true

@@ -30,12 +30,6 @@ do ->
         else ++j
     return
 
-  # TODO Event list binding
-  bind__EventList = (object, events, callback, context, once) ->
-    for event in events
-      bind__Base(object, event, callback, context, once)
-    return
-
   bind__EventMap = (object, hash, context, once) ->
     for events of hash
       bind__EventString(object, events, resolveCallback(object, hash[events]), context, once)
