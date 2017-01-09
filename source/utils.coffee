@@ -1,7 +1,5 @@
-generateOID = __root__._?.generateID ? do ->
-  n = 0
-  -> ++n
-
+generateOID = __root__._?.generateID ? do -> n = 0; (-> ++n)
+  
 getOID = (object) -> object.oid ?= generateOID()
 
 resolveCallback = (object, callback) ->
