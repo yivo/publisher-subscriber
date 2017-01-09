@@ -12,7 +12,7 @@ do ->
 
   listenTo__Base = (pub, sub, event, callback, once) ->
     cb = if once is true then onceWrap(pub, sub, event, callback) else callback
-    ((pub._ps ?= emptyObject())[event] ?= []).push(sub, cb, sub)
+    safeAccessListeners(pub, event).push(sub, cb, sub)
     increaseListeningCount(pub, sub)
     return
 
@@ -49,5 +49,4 @@ do ->
           else
             listenTo__EventMap(object, this, events, once)
         this
-
   return

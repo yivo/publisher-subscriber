@@ -12,7 +12,7 @@ do ->
 
   bind__Base = (object, event, callback, context, once) ->
     cb = if once is true then onceWrap(object, event, callback, context) else callback
-    ((object._ps ?= emptyObject())[event] ?= []).push(undefined, cb, context)
+    safeAccessListeners(object, event).push(undefined, cb, context)
     return
 
   bind__EventString = (object, events, callback, context, once) ->

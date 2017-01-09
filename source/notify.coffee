@@ -11,20 +11,18 @@ do ->
       else        array[idx - 1].apply(array[idx], args)                     while (idx += 3) < len
     return
 
-  triggerEvent = (ps, event, args) ->
-    list    = ps[event]
-    allList = ps.all
+  triggerEvent = (listeners, event, args) ->
+    list    = listeners[event]
+    listall = listeners.all
 
     if list?.length > 0
-      if allList?.length > 0
-        ref     = allList
-        allList = []
-        allList.push(el) for el in ref
+      if listall?.length > 0
+        listall = listall.slice()
       runCallbacks(list, args)
 
-    if allList?.length > 0
+    if listall?.length > 0
       args.unshift(event)
-      runCallbacks(allList, args)
+      runCallbacks(listall, args)
       args.shift()
     return
 
@@ -41,18 +39,18 @@ do ->
     return
 
   PS.trigger = PS.notify = (events) ->
-    if (ps = @_ps)? and (l = arguments.length) > 0
+    if (listeners = @__listeners__)? and (l = arguments.length) > 0
 
       # If events are space-separated
       # or there are entries for [event]
       # or there are entries for `all` event
-      if (idx = events.indexOf(' ')) > -1 or ps[events]?.length > 0 or ps.all?.length > 0
+      if (idx = events.indexOf(' ')) > -1 or listeners[events]?.length > 0 or listeners.all?.length > 0
         k           = 0
         args        = []
         args.push(arguments[k]) while ++k < l
         if idx > -1
-          triggerEachEvent(ps, events, args)
+          triggerEachEvent(listeners, events, args)
         else
-          triggerEvent(ps, events, args)
+          triggerEvent(listeners, events, args)
     this
   return

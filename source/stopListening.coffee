@@ -11,7 +11,7 @@ do ->
 
   stopListening__Base = (pub, sub, event, callback) ->
     n         = 0
-    listeners = pub._ps
+    listeners = pub.__listeners__
 
     if listeners? and (entries = listeners[event])?
       l  = entries.length
@@ -29,7 +29,7 @@ do ->
 
   stopListening__Everything__Iteratee = (pub, sub) ->
     n         = 0
-    listeners = pub._ps
+    listeners = pub.__listeners__
     
     for event in objectKeys(listeners)
       entries = listeners[event]
@@ -47,7 +47,7 @@ do ->
     return
 
   stopListening__Everything = (sub) ->
-    listening = sub._psTo
+    listening = sub.__listening__
     for oid in objectKeys(listening)
       stopListening__Everything__Iteratee(listening[oid][0], sub)
     return
@@ -65,7 +65,7 @@ do ->
     return
 
   stopListening__EventString__Iteratee = (pub, sub, event, callback) ->
-    listening = sub._psTo
+    listening = sub.__listening__
     for oid in objectKeys(listening)
       pair = listening[oid]
       if !pub? or pair[0] is pub
@@ -78,17 +78,17 @@ do ->
     return
 
   stopListening__AnyEvent = (pub, sub, callback) ->
-    listening = sub._psTo
+    listening = sub.__listening__
     for oid in objectKeys(listening)
       pair = listening[oid]
       if !pub? or pair[0] is pub
-        listeners = pair[0]._ps
+        listeners = pair[0].__listeners__
         for event in objectKeys(listeners)
           stopListening__Base(pair[0], sub, event, callback)
     return
 
   PS.stopListening = (object, events, callback) ->
-    if @_psTo?
+    if @__listening__?
       if !object? and !events? and !callback?
         stopListening__Everything(this)
 

@@ -1,6 +1,6 @@
 do ->
   unbind__Base = (object, event, cb, ctx) ->
-    return unless (e = object._ps[event])?
+    return unless (e = object.__listeners__[event])?
     return if (len = e.length) < 3
 
     r = []
@@ -15,7 +15,7 @@ do ->
       else
         r.push(e[k-2], e[k-1], e[k])
 
-    object._ps[event] = r
+    object.__listeners__[event] = r
     return
 
   unbind__EventString = (object, events, callback, context) ->
@@ -36,21 +36,21 @@ do ->
     return
 
   unbind__Everything = (object) ->
-    listeners = object._ps
+    listeners = object.__listeners__
     for event in objectKeys(listeners)
       if (entries = listeners[event])?
         for sub in entries by 3 when sub?
           decrementListeningCount(object, sub, 1)
-    object._ps = null
+    object.__listeners__ = null
     return
 
   unbind__AnyEvent = (object, callback, context) ->
-    for event in objectKeys(object._ps)
+    for event in objectKeys(object.__listeners__)
       unbind__Base(object, event, callback, context)
     return
 
   PS.unbind = PS.off = (events, callback, context) ->
-    if @_ps?
+    if @__listeners__?
       if !events? and !callback? and !context?
         unbind__Everything(this)
 
