@@ -1,7 +1,7 @@
 {
   "name": "publisher-subscriber",
   "version": "1.0.11",
-  "description": "Lightning fast Publisher-Subscriber pattern written in CoffeeScript. Compatible with Backbone.Events",
+  "description": "Lightning fast Publisher-Subscriber pattern written in CoffeeScript. Compatible with Backbone.Events.",
   "main": "build/publisher-subscriber.js",
   "scripts": {
     "test": "gulp build && jasmine",
@@ -24,9 +24,9 @@
     "gulp-plumber": "^1.0.0",
     "gulp-preprocess": "^2.0.0",
     "gulp-rename": "^1.2.2",
-    "gulp-replace": "^0.5.4",
     "gulp-uglify": "^2.0.0",
     "jasmine": "^2.2.1",
-    "underscore": "*"
+    "microtime": "^2.1.2",
+    "underscore": "^1.8.3"
   }
 }
