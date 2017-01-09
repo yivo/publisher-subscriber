@@ -10,35 +10,46 @@ do ->
     r
 
   stopListening__Base = (pub, sub, event, callback) ->
-    n       = 0
-    ps      = pub._ps
+    n         = 0
+    listeners = pub._ps
 
-    if ps? and (entries = ps[event])?
+    if listeners? and (entries = listeners[event])?
       l  = entries.length
       n += l
+      
       if l > 2
-        filtered = filterEntries(entries, sub, callback)
-        n       -= filtered.length
-      ps[event] = filtered
-      decrementListeningCount(pub, sub, n / 3) if n > 0
+        filtered         = filterEntries(entries, sub, callback)
+        n               -= filtered.length
+        listeners[event] = filtered
+      else
+        listeners[event] = []
+      
+    decrementListeningCount(pub, sub, n / 3) if n > 0
     return
 
   stopListening__Everything__Iteratee = (pub, sub) ->
-    ps    = pub._ps
-    n     = 0
-    for event, entries of ps when entries?
-      l  = entries.length
-      n += l
+    n         = 0
+    listeners = pub._ps
+    
+    for event in objectKeys(listeners)
+      entries = listeners[event]
+      l       = entries.length
+      n      += l
+      
       if l > 2
-        filtered = filterEntries(entries, sub, null)
-        n       -= filtered.length
-      ps[event] = filtered
+        filtered         = filterEntries(entries, sub, null)
+        n               -= filtered.length
+        listeners[event] = filtered
+      else
+        listeners[event] = []
+        
     decrementListeningCount(pub, sub, n / 3) if n > 0
     return
 
   stopListening__Everything = (sub) ->
-    for oid, pair of sub._psTo
-      stopListening__Everything__Iteratee(pair[0], sub)
+    listening = sub._psTo
+    for oid in objectKeys(listening)
+      stopListening__Everything__Iteratee(listening[oid][0], sub)
     return
 
   stopListening__EventString = (pub, sub, events, callback) ->
@@ -54,19 +65,26 @@ do ->
     return
 
   stopListening__EventString__Iteratee = (pub, sub, event, callback) ->
-    for oid, pair of sub._psTo when !pub? or pair[0] is pub
-      stopListening__Base(pair[0], sub, event, callback)
+    listening = sub._psTo
+    for oid in objectKeys(listening)
+      pair = listening[oid]
+      if !pub? or pair[0] is pub
+        stopListening__Base(pair[0], sub, event, callback)
     return
 
   stopListening__EventMap = (pub, sub, hash) ->
-    for own events, callback of hash
+    for events in objectKeys(hash)
       stopListening__EventString(pub, sub, events, resolveCallback(sub, hash[events]))
     return
 
   stopListening__AnyEvent = (pub, sub, callback) ->
-    for oid, pair of sub._psTo when !pub? or (ipub = pair[0]) is pub
-      for event of ipub._ps
-        stopListening__Base(ipub, sub, event, callback)
+    listening = sub._psTo
+    for oid in objectKeys(listening)
+      pair = listening[oid]
+      if !pub? or pair[0] is pub
+        listeners = pair[0]._ps
+        for event in objectKeys(listeners)
+          stopListening__Base(pair[0], sub, event, callback)
     return
 
   PS.stopListening = (object, events, callback) ->

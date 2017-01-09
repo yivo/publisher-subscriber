@@ -12,7 +12,7 @@ do ->
 
   listenTo__Base = (pub, sub, event, callback, once) ->
     cb = if once is true then onceWrap(pub, sub, event, callback) else callback
-    ((pub._ps ?= {})[event] ?= []).push(sub, cb, sub)
+    ((pub._ps ?= emptyObject())[event] ?= []).push(sub, cb, sub)
     increaseListeningCount(pub, sub)
     return
 
@@ -32,12 +32,12 @@ do ->
     return
 
   listenTo__EventMap = (pub, sub, hash, once) ->
-    for events of hash
+    for events in objectKeys(hash)
       listenTo__EventString(pub, sub, events, resolveCallback(sub, hash[events]), once)
     return
 
-  for own k, v of { listenTo: false, listenToOnce: true }
-    do (method = k, once = v) ->
+  for method, i in ['listenTo', 'listenToOnce']
+    do (method, once = i is 1) ->
 
       PS[method] = (object, events, callback) ->
         if events?

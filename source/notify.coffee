@@ -43,9 +43,9 @@ do ->
   PS.trigger = PS.notify = (events) ->
     if (ps = @_ps)? and (l = arguments.length) > 0
 
-      # If space-separated events
-      # or there entries for [event]
-      # or there entries for `all` event
+      # If events are space-separated
+      # or there are entries for [event]
+      # or there are entries for `all` event
       if (idx = events.indexOf(' ')) > -1 or ps[events]?.length > 0 or ps.all?.length > 0
         k           = 0
         args        = []

@@ -3,7 +3,7 @@ do ->
     return unless (e = object._ps[event])?
     return if (len = e.length) < 3
 
-    r = null
+    r = []
     k = -1
 
     while (k += 3) < len
@@ -13,7 +13,7 @@ do ->
         decrementListeningCount(object, sub, 1) if (sub = e[k-2])?
 
       else
-        (r ?= []).push(e[k-2], e[k-1], e[k])
+        r.push(e[k-2], e[k-1], e[k])
 
     object._ps[event] = r
     return
@@ -31,19 +31,21 @@ do ->
     return
 
   unbind__EventMap = (object, hash, context) ->
-    for events of hash
+    for events in objectKeys(hash)
       unbind__EventString(object, events, resolveCallback(object, hash[events]), context)
     return
 
   unbind__Everything = (object) ->
-    for event, entries of object._ps when entries?
-      for sub in entries by 3 when sub?
-        decrementListeningCount(object, sub, 1)
+    listeners = object._ps
+    for event in objectKeys(listeners)
+      if (entries = listeners[event])?
+        for sub in entries by 3 when sub?
+          decrementListeningCount(object, sub, 1)
     object._ps = null
     return
 
   unbind__AnyEvent = (object, callback, context) ->
-    for event of object._ps
+    for event in objectKeys(object._ps)
       unbind__Base(object, event, callback, context)
     return
 

@@ -12,7 +12,7 @@ do ->
 
   bind__Base = (object, event, callback, context, once) ->
     cb = if once is true then onceWrap(object, event, callback, context) else callback
-    ((object._ps ?= {})[event] ?= []).push(undefined, cb, context)
+    ((object._ps ?= emptyObject())[event] ?= []).push(undefined, cb, context)
     return
 
   bind__EventString = (object, events, callback, context, once) ->
@@ -31,12 +31,12 @@ do ->
     return
 
   bind__EventMap = (object, hash, context, once) ->
-    for events of hash
+    for events in objectKeys(hash)
       bind__EventString(object, events, resolveCallback(object, hash[events]), context, once)
     return
 
-  for own k, v of { on: false, once: true }
-    do (method = k, once = v) ->
+  for method, i in ['on', 'once']
+    do (method, once = i is 1) ->
 
       PS[method] = (events, callback, context) ->
         if events?
