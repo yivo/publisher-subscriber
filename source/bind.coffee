@@ -41,7 +41,7 @@ do ->
       bind__EventString(object, events, resolveCallback(object, hash[events]), context, once)
     return
 
-  for own k, v of { bind: false, bindOnce: true }
+  for own k, v of { on: false, once: true }
     do (method = k, once = v) ->
 
       PS[method] = (events, callback, context) ->
@@ -54,7 +54,6 @@ do ->
           else
             bind__EventMap(this, events, context ? callback ? this, once)
         this
-
-  PS.on   = PS.bind
-  PS.once = PS.bindOnce
+  
+  PS.bind = PS.on
   return
