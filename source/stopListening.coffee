@@ -23,7 +23,7 @@ do ->
       decrementListeningCount(pub, sub, n / 3) if n > 0
     return
 
-  stopListening__Everything__Iteration = (pub, sub) ->
+  stopListening__Everything__Iteratee = (pub, sub) ->
     ps    = pub._ps
     n     = 0
     for event, entries of ps when entries?
@@ -38,7 +38,7 @@ do ->
 
   stopListening__Everything = (sub) ->
     for oid, pair of sub._psTo
-      stopListening__Everything__Iteration(pair[0], sub)
+      stopListening__Everything__Iteratee(pair[0], sub)
     return
 
   stopListening__EventString = (pub, sub, events, callback) ->
@@ -48,12 +48,12 @@ do ->
     while ++i <= l
       if i is l or events[i] is ' '
         if j > 0
-          stopListening__EventString__Iteration(pub, sub, events[i - j...i], callback)
+          stopListening__EventString__Iteratee(pub, sub, events[i - j...i], callback)
           j = 0
       else ++j
     return
 
-  stopListening__EventString__Iteration = (pub, sub, event, callback) ->
+  stopListening__EventString__Iteratee = (pub, sub, event, callback) ->
     for oid, pair of sub._psTo when !pub? or pair[0] is pub
       stopListening__Base(pair[0], sub, event, callback)
     return
@@ -82,7 +82,5 @@ do ->
 
       else
         stopListening__AnyEvent(object, this, resolveCallback(this, callback))
-
     this
-
   return
