@@ -1,6 +1,6 @@
 describe('PublisherSubscriber', function() {
 
-  it("on and trigger", function() {
+  it('on and trigger', function() {
     var obj = {counter: 0};
     _.extend(obj, PublisherSubscriber.InstanceMembers);
     obj.on('event', function() { obj.counter += 1; });
@@ -13,7 +13,7 @@ describe('PublisherSubscriber', function() {
     expect(obj.counter).toEqual(5, 'counter should be incremented five times.');
   });
 
-  it("binding and triggering multiple events", function() {
+  it('binding and triggering multiple events', function() {
     var obj = {counter: 0};
     _.extend(obj, PublisherSubscriber.InstanceMembers);
 
@@ -33,7 +33,7 @@ describe('PublisherSubscriber', function() {
     expect(obj.counter).toBe(5);
   });
 
-  it("binding and triggering with event maps", function() {
+  it('binding and triggering with event maps', function() {
     var obj = {counter: 0};
     _.extend(obj, PublisherSubscriber.InstanceMembers);
 
@@ -61,7 +61,7 @@ describe('PublisherSubscriber', function() {
     expect(obj.counter).toBe(5);
   });
 
-  it("binding and triggering multiple event names with event maps", function() {
+  it('binding and triggering multiple event names with event maps', function() {
     var obj = {counter: 0};
     _.extend(obj, PublisherSubscriber.InstanceMembers);
 
@@ -90,7 +90,7 @@ describe('PublisherSubscriber', function() {
     expect(obj.counter).toBe(5);
   });
 
-  it("binding and trigger with event maps context", function() {
+  it('binding and trigger with event maps context', function() {
     var obj = {counter: 0};
     var context = {};
     _.extend(obj, PublisherSubscriber.InstanceMembers);
@@ -108,7 +108,7 @@ describe('PublisherSubscriber', function() {
     }, this, context).trigger('a');
   });
 
-  it("listenTo and stopListening", function() {
+  it('listenTo and stopListening', function() {
     var a = _.extend({}, PublisherSubscriber.InstanceMembers);
     var b = _.extend({}, PublisherSubscriber.InstanceMembers);
     a.listenTo(b, 'all', function() { expect(true).toBeTruthy(); });
@@ -118,7 +118,7 @@ describe('PublisherSubscriber', function() {
     b.trigger('anything');
   });
 
-  it("listenTo and stopListening with event maps", function() {
+  it('listenTo and stopListening with event maps', function() {
     var a = _.extend({}, PublisherSubscriber.InstanceMembers);
     var b = _.extend({}, PublisherSubscriber.InstanceMembers);
     var cb = function() { expect(true).toBeTruthy(); };
@@ -132,7 +132,7 @@ describe('PublisherSubscriber', function() {
     b.trigger('event event2');
   });
 
-  it("stopListening with omitted args", function() {
+  it('stopListening with omitted args', function() {
     var a = _.extend({}, PublisherSubscriber.InstanceMembers);
     var b = _.extend({}, PublisherSubscriber.InstanceMembers);
     var cb = function() { expect(true).toBeTruthy(); };
@@ -148,7 +148,7 @@ describe('PublisherSubscriber', function() {
     b.trigger('event2');
   });
 
-  it("listenToOnce", function() {
+  it('listenToOnce', function() {
     // Same as the previous test, but we use once rather than having to explicitly unbind
     var obj = {counterA: 0, counterB: 0};
     _.extend(obj, PublisherSubscriber.InstanceMembers);
@@ -164,7 +164,7 @@ describe('PublisherSubscriber', function() {
     expect(obj.counterB).toEqual(1, 'counterB should have only been incremented once.');
   });
 
-  it("listenToOnce and stopListening", function() {
+  it('listenToOnce and stopListening', function() {
     var a = _.extend({}, PublisherSubscriber.InstanceMembers);
     var b = _.extend({}, PublisherSubscriber.InstanceMembers);
     a.listenToOnce(b, 'all', function() { expect(true).toBeTruthy(); });
@@ -175,7 +175,7 @@ describe('PublisherSubscriber', function() {
     b.trigger('anything');
   });
 
-  it("listenTo, listenToOnce and stopListening", function() {
+  it('listenTo, listenToOnce and stopListening', function() {
     var a = _.extend({}, PublisherSubscriber.InstanceMembers);
     var b = _.extend({}, PublisherSubscriber.InstanceMembers);
     a.listenToOnce(b, 'all', function() { expect(true).toBeTruthy(); });
@@ -186,7 +186,7 @@ describe('PublisherSubscriber', function() {
     b.trigger('anything');
   });
 
-  it("listenTo and stopListening with event maps", function() {
+  it('listenTo and stopListening with event maps', function() {
     var a = _.extend({}, PublisherSubscriber.InstanceMembers);
     var b = _.extend({}, PublisherSubscriber.InstanceMembers);
     a.listenTo(b, {change: function() { expect(true).toBeTruthy(); }});
@@ -196,94 +196,94 @@ describe('PublisherSubscriber', function() {
     b.trigger('change');
   });
 
-  it("listenTo yourself", function() {
+  it('listenTo yourself', function() {
     var e = _.extend({}, PublisherSubscriber.InstanceMembers);
     var n = 0;
-    e.listenTo(e, "foo", function() { ++n; });
-    e.trigger("foo");
+    e.listenTo(e, 'foo', function() { ++n; });
+    e.trigger('foo');
     expect(n).toBe(1);
   });
 
-  it("listenTo yourself cleans yourself up with stopListening", function() {
+  it('listenTo yourself cleans yourself up with stopListening', function() {
     var e = _.extend({}, PublisherSubscriber.InstanceMembers);
     var n = 0;
-    e.listenTo(e, "foo", function() { ++n; });
-    e.trigger("foo");
+    e.listenTo(e, 'foo', function() { ++n; });
+    e.trigger('foo');
     expect(n).toBe(1);
     e.stopListening();
-    e.trigger("foo");
+    e.trigger('foo');
     expect(n).toBe(1);
   });
 
-  it("stopListening cleans up references", function() {
+  it('stopListening cleans up references', function() {
     var a = _.extend({}, PublisherSubscriber.InstanceMembers);
     var b = _.extend({}, PublisherSubscriber.InstanceMembers);
     var fn = function() {};
     b.on('event', fn);
     a.listenTo(b, 'event', fn).stopListening();
-    expect(_.size(a._3)).toBe(0);
-    expect(_.size(b._2.event)).toBe(3);
+    expect(_.size(a.__listening__)).toBe(0);
+    expect(_.size(b.__listeners__.event)).toBe(3);
     //expect(_.size(b._listeners)).toBe(0);
     a.listenTo(b, 'event', fn).stopListening(b);
-    expect(_.size(a._3)).toBe(0);
-    expect(_.size(b._2.event)).toBe(3);
+    expect(_.size(a.__listening__)).toBe(0);
+    expect(_.size(b.__listeners__.event)).toBe(3);
     //expect(_.size(b._listeners)).toBe(0);
     a.listenTo(b, 'event', fn).stopListening(b, 'event');
-    expect(_.size(a._3)).toBe(0);
-    expect(_.size(b._2.event)).toBe(3);
+    expect(_.size(a.__listening__)).toBe(0);
+    expect(_.size(b.__listeners__.event)).toBe(3);
     //expect(_.size(b._listeners)).toBe(0);
     a.listenTo(b, 'event', fn).stopListening(b, 'event', fn);
-    expect(_.size(a._3)).toBe(0);
-    expect(_.size(b._2.event)).toBe(3);
+    expect(_.size(a.__listening__)).toBe(0);
+    expect(_.size(b.__listeners__.event)).toBe(3);
     //expect(_.size(b._listeners)).toBe(0);
   });
 
-  it("stopListening cleans up references from listenToOnce", function() {
+  it('stopListening cleans up references from listenToOnce', function() {
     var a = _.extend({}, PublisherSubscriber.InstanceMembers);
     var b = _.extend({}, PublisherSubscriber.InstanceMembers);
     var fn = function() {};
     b.on('event', fn);
     a.listenToOnce(b, 'event', fn).stopListening();
-    expect(_.size(a._3)).toBe(0);
-    expect(_.size(b._2.event)).toBe(3);
+    expect(_.size(a.__listening__)).toBe(0);
+    expect(_.size(b.__listeners__.event)).toBe(3);
     //expect(_.size(b._listeners)).toBe(0);
     a.listenToOnce(b, 'event', fn).stopListening(b);
-    expect(_.size(a._3)).toBe(0);
-    expect(_.size(b._2.event)).toBe(3);
+    expect(_.size(a.__listening__)).toBe(0);
+    expect(_.size(b.__listeners__.event)).toBe(3);
     //expect(_.size(b._listeners)).toBe(0);
     a.listenToOnce(b, 'event', fn).stopListening(b, 'event');
-    expect(_.size(a._3)).toBe(0);
-    expect(_.size(b._2.event)).toBe(3);
+    expect(_.size(a.__listening__)).toBe(0);
+    expect(_.size(b.__listeners__.event)).toBe(3);
     //expect(_.size(b._listeners)).toBe(0);
     a.listenToOnce(b, 'event', fn).stopListening(b, 'event', fn);
-    expect(_.size(a._3)).toBe(0);
-    expect(_.size(b._2.event)).toBe(3);
+    expect(_.size(a.__listening__)).toBe(0);
+    expect(_.size(b.__listeners__.event)).toBe(3);
     //expect(_.size(b._listeners)).toBe(0);
   });
 
-  it("listenTo and off cleaning up references", function() {
+  it('listenTo and off cleaning up references', function() {
     var a = _.extend({}, PublisherSubscriber.InstanceMembers);
     var b = _.extend({}, PublisherSubscriber.InstanceMembers);
     var fn = function() {};
     a.listenTo(b, 'event', fn);
     b.off();
-    expect(_.size(a._3)).toBe(0);
+    expect(_.size(a.__listening__)).toBe(0);
     //expect(_.size(b._listeners)).toBe(0);
     a.listenTo(b, 'event', fn);
     b.off('event');
-    expect(_.size(a._3)).toBe(0);
+    expect(_.size(a.__listening__)).toBe(0);
     //expect(_.size(b._listeners)).toBe(0);
     a.listenTo(b, 'event', fn);
     b.off(null, fn);
-    expect(_.size(a._3)).toBe(0);
+    expect(_.size(a.__listening__)).toBe(0);
     //expect(_.size(b._listeners)).toBe(0);
     a.listenTo(b, 'event', fn);
     b.off(null, null, a);
-    expect(_.size(a._3)).toBe(0);
+    expect(_.size(a.__listening__)).toBe(0);
     //expect(_.size(b._listeners)).toBe(0);
   });
 
-  it("listenTo and stopListening cleaning up references", function() {
+  it('listenTo and stopListening cleaning up references', function() {
     var a = _.extend({}, PublisherSubscriber.InstanceMembers);
     var b = _.extend({}, PublisherSubscriber.InstanceMembers);
     a.listenTo(b, 'all', function() { expect(true).toBeTruthy(); });
@@ -291,18 +291,18 @@ describe('PublisherSubscriber', function() {
     a.listenTo(b, 'other', function() { expect(true).toBeFalsy(); });
     a.stopListening(b, 'other');
     a.stopListening(b, 'all');
-    expect(_.size(a._3)).toBe(0);
+    expect(_.size(a.__listening__)).toBe(0);
   });
 
-  it("listenToOnce without context cleans up references after the event has fired", function() {
+  it('listenToOnce without context cleans up references after the event has fired', function() {
     var a = _.extend({}, PublisherSubscriber.InstanceMembers);
     var b = _.extend({}, PublisherSubscriber.InstanceMembers);
     a.listenToOnce(b, 'all', function() { expect(true).toBeTruthy(); });
     b.trigger('anything');
-    expect(_.size(a._3)).toBe(0);
+    expect(_.size(a.__listening__)).toBe(0);
   });
 
-  it("listenToOnce with event maps cleans up references", function() {
+  it('listenToOnce with event maps cleans up references', function() {
     var a = _.extend({}, PublisherSubscriber.InstanceMembers);
     var b = _.extend({}, PublisherSubscriber.InstanceMembers);
     var eventMap = {
@@ -312,10 +312,10 @@ describe('PublisherSubscriber', function() {
     a.listenToOnce(b, eventMap);
     b.trigger('one');
     expect(eventMap.one.calls.count()).toBe(1);
-    expect(_.size(a._3)).toBe(1);
+    expect(_.size(a.__listening__)).toBe(1);
   });
 
-  it("listenToOnce with event maps binds the correct `this`", function() {
+  it('listenToOnce with event maps binds the correct `this`', function() {
     var a = _.extend({}, PublisherSubscriber.InstanceMembers);
     var b = _.extend({}, PublisherSubscriber.InstanceMembers);
     a.listenToOnce(b, {
@@ -326,12 +326,12 @@ describe('PublisherSubscriber', function() {
 
   it("listenTo with empty callback doesn't throw an error", function() {
     var e = _.extend({}, PublisherSubscriber.InstanceMembers);
-    e.listenTo(e, "foo", null);
-    e.trigger("foo");
+    e.listenTo(e, 'foo', null);
+    e.trigger('foo');
     expect(true).toBeTruthy();
   });
 
-  it("trigger all for each event", function() {
+  it('trigger all for each event', function() {
     var a, b, obj = {counter: 0};
     _.extend(obj, PublisherSubscriber.InstanceMembers);
     obj.on('all', function(event) {
@@ -345,7 +345,7 @@ describe('PublisherSubscriber', function() {
     expect(obj.counter).toBe(2);
   });
 
-  it("on, then unbind all functions", function() {
+  it('on, then unbind all functions', function() {
     var obj = {counter: 0};
     _.extend(obj, PublisherSubscriber.InstanceMembers);
     var callback = function() { obj.counter += 1; };
@@ -356,7 +356,7 @@ describe('PublisherSubscriber', function() {
     expect(obj.counter).toEqual(1, 'counter should have only been incremented once.');
   });
 
-  it("bind two callbacks, unbind only one", function() {
+  it('bind two callbacks, unbind only one', function() {
     var obj = {counterA: 0, counterB: 0};
     _.extend(obj, PublisherSubscriber.InstanceMembers);
     var callback = function() { obj.counterA += 1; };
@@ -369,7 +369,7 @@ describe('PublisherSubscriber', function() {
     expect(obj.counterB).toEqual(2, 'counterB should have been incremented twice.');
   });
 
-  it("unbind a callback in the midst of it firing", function() {
+  it('unbind a callback in the midst of it firing', function() {
     var obj = {counter: 0};
     _.extend(obj, PublisherSubscriber.InstanceMembers);
     var callback = function() {
@@ -383,7 +383,7 @@ describe('PublisherSubscriber', function() {
     expect(obj.counter).toEqual(1, 'the callback should have been unbound.');
   });
 
-  it("two binds that unbind themeselves", function() {
+  it('two binds that unbind themeselves', function() {
     var obj = {counterA: 0, counterB: 0};
     _.extend(obj, PublisherSubscriber.InstanceMembers);
     var incrA = function() {
@@ -403,7 +403,7 @@ describe('PublisherSubscriber', function() {
     expect(obj.counterB).toEqual(1, 'counterB should have only been incremented once.');
   });
 
-  it("bind a callback with a supplied context", function() {
+  it('bind a callback with a supplied context', function() {
     var TestClass = function() {
       return this;
     };
@@ -416,7 +416,7 @@ describe('PublisherSubscriber', function() {
     obj.trigger('event');
   });
 
-  it("nested trigger with unbind", function() {
+  it('nested trigger with unbind', function() {
     var obj = {counter: 0};
     _.extend(obj, PublisherSubscriber.InstanceMembers);
     var incr1 = function() {
@@ -431,7 +431,7 @@ describe('PublisherSubscriber', function() {
     expect(obj.counter).toEqual(3, 'counter should have been incremented three times');
   });
 
-  it("callback list is not altered during trigger", function() {
+  it('callback list is not altered during trigger', function() {
     var counter = 0, obj = _.extend({}, PublisherSubscriber.InstanceMembers);
     var incr = function() { counter++; };
     var incrOn = function() { obj.on('event all', incr); };
@@ -444,7 +444,7 @@ describe('PublisherSubscriber', function() {
     expect(counter).toEqual(2, 'off does not alter callback list');
   });
 
-  it("#1282 - 'all' callback list is retrieved after each event.", function() {
+  it("#1282 - 'all' callback list is retrieved after each event", function() {
     var counter = 0;
     var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
     var incr = function() { counter++; };
@@ -455,18 +455,18 @@ describe('PublisherSubscriber', function() {
     expect(counter).toBe(2);
   });
 
-  it("if no callback is provided, `on` is a noop", function() {
+  it('if no callback is provided, `on` is a noop', function() {
     _.extend({}, PublisherSubscriber.InstanceMembers).on('test').trigger('test');
   });
 
-  it("if callback is truthy but not a function, `on` should throw an error just like jQuery", function() {
+  it('if callback is truthy but not a function, `on` should throw an error just like jQuery', function() {
     var view = _.extend({}, PublisherSubscriber.InstanceMembers).on('test', 'noop');
     expect(function() {
       view.trigger('test');
     }).toThrow();
   });
 
-  it("remove all events for a specific context", function() {
+  it('remove all events for a specific context', function() {
     var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
     obj.on('x y all', function() { expect(true).toBeTruthy(); });
     obj.on('x y all', function() { expect(true).toBeFalsy(); }, obj);
@@ -474,7 +474,7 @@ describe('PublisherSubscriber', function() {
     obj.trigger('x y');
   });
 
-  it("remove all events for a specific callback", function() {
+  it('remove all events for a specific callback', function() {
     var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
     var success = function() { expect(true).toBeTruthy(); };
     var fail = function() { expect(true).toBeFalsy(); };
@@ -484,7 +484,7 @@ describe('PublisherSubscriber', function() {
     obj.trigger('x y');
   });
 
-  it("#1310 - off does not skip consecutive events", function() {
+  it('#1310 - off does not skip consecutive events', function() {
     var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
     obj.on('event', function() { expect(true).toBeFalsy(); }, obj);
     obj.on('event', function() { expect(true).toBeFalsy(); }, obj);
@@ -492,7 +492,7 @@ describe('PublisherSubscriber', function() {
     obj.trigger('event');
   });
 
-  it("once", function() {
+  it('once', function() {
     // Same as the previous test, but we use once rather than having to explicitly unbind
     var obj = {counterA: 0, counterB: 0};
     _.extend(obj, PublisherSubscriber.InstanceMembers);
@@ -508,7 +508,7 @@ describe('PublisherSubscriber', function() {
     expect(obj.counterB).toBe(1, 'counterB should have only been incremented once.');
   });
 
-  it("once variant one", function() {
+  it('once variant one', function() {
     var f = function() { expect(true).toBeTruthy(); };
 
     var a = _.extend({}, PublisherSubscriber.InstanceMembers).once('event', f);
@@ -520,7 +520,7 @@ describe('PublisherSubscriber', function() {
     b.trigger('event');
   });
 
-  it("once variant two", function() {
+  it('once variant two', function() {
     var f = function() { expect(true).toBeTruthy(); };
     var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
 
@@ -531,7 +531,7 @@ describe('PublisherSubscriber', function() {
       .trigger('event');
   });
 
-  it("once with off", function() {
+  it('once with off', function() {
     var f = function() { expect(true).toBeTruthy(); };
     var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
 
@@ -540,7 +540,7 @@ describe('PublisherSubscriber', function() {
     obj.trigger('event');
   });
 
-  it("once with event maps", function() {
+  it('once with event maps', function() {
     var obj = {counter: 0};
     _.extend(obj, PublisherSubscriber.InstanceMembers);
 
@@ -579,7 +579,7 @@ describe('PublisherSubscriber', function() {
     expect(obj.counter).toBe(1);
   });
 
-  it("once with off only by context", function() {
+  it('once with off only by context', function() {
     var context = {};
     var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
     obj.once('event', function() { expect(true).toBeFalsy(); }, context);
@@ -587,7 +587,7 @@ describe('PublisherSubscriber', function() {
     obj.trigger('event');
   });
 
-  it("once with asynchronous events", function(done) {
+  it('once with asynchronous events', function(done) {
     var func = _.debounce(function() {
       expect(true).toBeTruthy();
       done();
@@ -598,13 +598,13 @@ describe('PublisherSubscriber', function() {
     obj.trigger('async');
   });
 
-  it("once with multiple events.", function() {
+  it('once with multiple events.', function() {
     var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
     obj.once('x y', function() { expect(true).toBeTruthy(); });
     obj.trigger('x y');
   });
 
-  it("Off during iteration with once.", function() {
+  it('Off during iteration with once.', function() {
     var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
     var f = function() { this.off('event', f); };
     obj.on('event', f);
@@ -615,7 +615,7 @@ describe('PublisherSubscriber', function() {
     obj.trigger('event');
   });
 
-  it("`once` on `all` should work as expected", function() {
+  it('`once` on `all` should work as expected', function() {
     var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
     obj.once('all', function() {
       expect(true).toBeTruthy();
@@ -624,16 +624,16 @@ describe('PublisherSubscriber', function() {
     obj.trigger('all');
   });
 
-  it("once without a callback is a noop", function() {
+  it('once without a callback is a noop', function() {
     _.extend({}, PublisherSubscriber.InstanceMembers).once('event').trigger('event');
   });
 
-  it("listenToOnce without a callback is a noop", function() {
+  it('listenToOnce without a callback is a noop', function() {
     var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
     obj.listenToOnce(obj, 'event').trigger('event');
   });
 
-  it("event functions are chainable", function() {
+  it('event functions are chainable', function() {
     var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
     var obj2 = _.extend({}, PublisherSubscriber.InstanceMembers);
     var fn = function() {};
@@ -650,7 +650,7 @@ describe('PublisherSubscriber', function() {
     expect(obj).toBe(obj.stopListening());
   });
 
-  it("#3448 - listenToOnce with space-separated events", function() {
+  it('#3448 - listenToOnce with space-separated events', function() {
     var one = _.extend({}, PublisherSubscriber.InstanceMembers);
     var two = _.extend({}, PublisherSubscriber.InstanceMembers);
     var count = 1;
@@ -673,7 +673,7 @@ describe('PublisherSubscriber', function() {
     expect(one.fn.calls.count()).toEqual(2);
   });
 
-  it("Callback as property name (bind)", function() {
+  it('Callback as property name (bind)', function() {
     var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
     var counter = 0;
     obj.fn = function() { counter++; };
@@ -697,7 +697,7 @@ describe('PublisherSubscriber', function() {
     counter = 0;
   });
 
-  it("Callback as property name (listenTo)", function() {
+  it('Callback as property name (listenTo)', function() {
     var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
     var counter = 0;
     obj.fn = function() { counter++; };
@@ -717,34 +717,6 @@ describe('PublisherSubscriber', function() {
     obj.listenToOnce(obj, 'event', 'fn');
     obj.trigger('event');
     obj.trigger('event');
-    expect(counter).toBe(1);
-    counter = 0;
-  });
-
-  it("Fast properties", function() {
-    return;
-    var obj = _.extend({}, PublisherSubscriber.InstanceMembers);
-    var counter = 0;
-    obj.fn = function() { counter++; };
-
-    obj.listenTo(obj, 'namespace:event', 'fn');
-    expect(_.keys(obj._2)[0]).toBe('namespace_event');
-    obj.trigger('namespace:event');
-    expect(counter).toEqual(1);
-    obj.stopListening(obj, 'namespace:event', 'fn');
-    counter = 0;
-
-    obj.listenTo(obj, {'namespace:event': 'fn'});
-    expect(_.keys(obj._2)[0]).toBe('namespace_event');
-    obj.trigger('namespace:event');
-    expect(counter).toEqual(1);
-    obj.stopListening(obj, {'namespace:event': 'fn'});
-    counter = 0;
-
-    obj.listenToOnce(obj, 'namespace:event', 'fn');
-    expect(_.keys(obj._2)[0]).toBe('namespace_event');
-    obj.trigger('namespace:event');
-    obj.trigger('namespace:event');
     expect(counter).toBe(1);
     counter = 0;
   });
