@@ -10,56 +10,52 @@
 
   # AMD
   if typeof define is 'function' and typeof define.amd is 'object' and define.amd isnt null
-    root.PublisherSubscriber = factory(root)
+    root.PublisherSubscriber = factory(root, Object)
     define -> root.PublisherSubscriber
 
   # CommonJS
   else if typeof module is 'object' and module isnt null and
           typeof module.exports is 'object' and module.exports isnt null
-    module.exports = factory(root)
+    module.exports = factory(root, Object)
 
   # Browser and the rest
   else
-    root.PublisherSubscriber = factory(root)
+    root.PublisherSubscriber = factory(root, Object)
 
   # No return value
   return
 
-)((__root__) ->
+)((__root__, Object) ->
   PS = {}
   
-  generateOID = __root__._?.generateID ? do ->
-    n = 0
-    -> ++n
+  generateOID         = __root__._?.generateID ? do -> n = 0; (-> ++n)
   
-  getOID = (object) -> object.oid ?= generateOID()
+  objectKeys          = __root__._?.keys ? Object.keys
   
-  resolveCallback = (object, callback) ->
-    if typeof callback is 'string' then object[callback] else callback
+  objectCreate        = if Object.create? then -> Object.create(null) else -> {}
+  
+  safeGetOID          = (object) -> object.oid ?= generateOID()
+  
+  safeGetListeners    = (object) -> object.__listeners__ ?= objectCreate()
+  
+  safeAccessListeners = (object, event) -> safeGetListeners(object)[event] ?= []
+  
+  safeGetListening    = (object) -> object.__listening__ ?= objectCreate()
+    
+  resolveCallback     = (object, callback) -> if typeof callback is 'string' then object[callback] else callback
   
   increaseListeningCount = (pub, sub) ->
-    listening = (sub._3 ?= {})
-    record    = (listening[pub.oid ?= generateOID()] ?= [pub, 0])
+    listening  = safeGetListening(sub)
+    record     = (listening[safeGetOID(pub)] ?= [pub, 0])
     record[1] += 1
     return
   
   decrementListeningCount = (pub, sub, n) ->
-    oid       = pub.oid ?= generateOID()
-    record    = sub._3[oid]
-    if record? and (record[1] -= n | 0) < 1
-      delete sub._3[oid]
+    oid       = safeGetOID(pub)
+    record    = sub.__listening__[oid]
+    if record? and (record[1] -= n|0) < 1
+      delete sub.__listening__[oid]
     return
-  
-  fastProperty = (prop) ->
-    if prop.indexOf(':') > -1
-  
-      # http://stackoverflow.com/questions/14352100/does-v8-cache-compiled-regular-expressions-automatically
-      prop.replace(/:/g, '_')
-    else
-      prop
-  
-  # TODO Event list binding
-  isArrayLike = (obj) -> obj? and typeof obj.length is 'number'
   
   isNoisy = (options) ->
     # null, undefined => true
@@ -67,7 +63,7 @@
     # false           => false
     # {}              => true
     # {silent: *}     => !silent
-    options != false && (options && options.silent) != true
+    options isnt false and options?.silent isnt true
   
   isEventable = (obj) -> obj?.on is PS.on
   
@@ -85,7 +81,7 @@
   
     bind__Base = (object, event, callback, context, once) ->
       cb = if once is true then onceWrap(object, event, callback, context) else callback
-      ((object._2 ?= {})[event] ?= []).push(undefined, cb, context)
+      safeAccessListeners(object, event).push(undefined, cb, context)
       return
   
     bind__EventString = (object, events, callback, context, once) ->
@@ -103,33 +99,26 @@
           else ++j
       return
   
-    # TODO Event list binding
-    bind__EventList = (object, events, callback, context, once) ->
-      for event in events
-        bind__Base(object, event, callback, context, once)
-      return
-  
     bind__EventMap = (object, hash, context, once) ->
-      for events of hash
-        bind__EventString(object, events, (if typeof hash[events] is 'string' then object[hash[events]] else hash[events]), context, once)
+      for events in objectKeys(hash)
+        bind__EventString(object, events, resolveCallback(object, hash[events]), context, once)
       return
   
-    for own k, v of { bind: false, bindOnce: true }
-      do (method = k, once = v) ->
+    for method, i in ['on', 'once']
+      do (method, once = i is 1) ->
   
         PS[method] = (events, callback, context) ->
           if events?
             if typeof events is 'string'
   
               if callback? # Added here for spec: "if no callback is provided, `on` is a noop"
-                bind__EventString(this, events, (if typeof callback is 'string' then this[callback] else callback), context ? this, once)
+                bind__EventString(this, events, resolveCallback(this, callback), context ? this, once)
   
             else
               bind__EventMap(this, events, context ? callback ? this, once)
           this
-  
-    PS.on   = PS.bind
-    PS.once = PS.bindOnce
+    
+    PS.bind = PS.on
     return
   
   do ->
@@ -146,7 +135,7 @@
   
     listenTo__Base = (pub, sub, event, callback, once) ->
       cb = if once is true then onceWrap(pub, sub, event, callback) else callback
-      ((pub._2 ?= {})[event] ?= []).push(sub, cb, sub)
+      safeAccessListeners(pub, event).push(sub, cb, sub)
       increaseListeningCount(pub, sub)
       return
   
@@ -166,24 +155,23 @@
       return
   
     listenTo__EventMap = (pub, sub, hash, once) ->
-      for events of hash
-        listenTo__EventString(pub, sub, events, (if typeof hash[events] is 'string' then sub[hash[events]] else hash[events]), once)
+      for events in objectKeys(hash)
+        listenTo__EventString(pub, sub, events, resolveCallback(sub, hash[events]), once)
       return
   
-    for own k, v of { listenTo: false, listenToOnce: true }
-      do (method = k, once = v) ->
+    for method, i in ['listenTo', 'listenToOnce']
+      do (method, once = i is 1) ->
   
         PS[method] = (object, events, callback) ->
           if events?
             if typeof events is 'string'
   
               if callback? # Added here for spec: "listenTo with empty callback doesn't throw an error"
-                listenTo__EventString(object, this, events, (if typeof callback is 'string' then this[callback] else callback), once)
+                listenTo__EventString(object, this, events, resolveCallback(this, callback), once)
   
             else
               listenTo__EventMap(object, this, events, once)
           this
-  
     return
   
   do ->
@@ -198,35 +186,46 @@
       r
   
     stopListening__Base = (pub, sub, event, callback) ->
-      n       = 0
-      ps      = pub._2
+      n         = 0
+      listeners = pub.__listeners__
   
-      if ps? and (entries = ps[event])?
+      if listeners? and (entries = listeners[event])?
         l  = entries.length
         n += l
+        
         if l > 2
-          filtered = filterEntries(entries, sub, callback)
-          n       -= filtered.length
-        ps[event] = filtered
-        decrementListeningCount(pub, sub, n / 3) if n > 0
+          filtered         = filterEntries(entries, sub, callback)
+          n               -= filtered.length
+          listeners[event] = filtered
+        else
+          listeners[event] = []
+        
+      decrementListeningCount(pub, sub, n / 3) if n > 0
       return
   
-    stopListening__Everything__Iteration = (pub, sub) ->
-      ps    = pub._2
-      n     = 0
-      for event, entries of ps when entries?
-        l  = entries.length
-        n += l
+    stopListening__Everything__Iteratee = (pub, sub) ->
+      n         = 0
+      listeners = pub.__listeners__
+      
+      for event in objectKeys(listeners)
+        entries = listeners[event]
+        l       = entries.length
+        n      += l
+        
         if l > 2
-          filtered = filterEntries(entries, sub, null)
-          n       -= filtered.length
-        ps[event] = filtered
+          filtered         = filterEntries(entries, sub, null)
+          n               -= filtered.length
+          listeners[event] = filtered
+        else
+          listeners[event] = []
+          
       decrementListeningCount(pub, sub, n / 3) if n > 0
       return
   
     stopListening__Everything = (sub) ->
-      for oid, pair of sub._3
-        stopListening__Everything__Iteration(pair[0], sub)
+      listening = sub.__listening__
+      for oid in objectKeys(listening)
+        stopListening__Everything__Iteratee(listening[oid][0], sub)
       return
   
     stopListening__EventString = (pub, sub, events, callback) ->
@@ -236,43 +235,48 @@
       while ++i <= l
         if i is l or events[i] is ' '
           if j > 0
-            stopListening__EventString__Iteration(pub, sub, events[i - j...i], callback)
+            stopListening__EventString__Iteratee(pub, sub, events[i - j...i], callback)
             j = 0
         else ++j
       return
   
-    stopListening__EventString__Iteration = (pub, sub, event, callback) ->
-      for oid, pair of sub._3 when !pub? or pair[0] is pub
-        stopListening__Base(pair[0], sub, event, callback)
+    stopListening__EventString__Iteratee = (pub, sub, event, callback) ->
+      listening = sub.__listening__
+      for oid in objectKeys(listening)
+        pair = listening[oid]
+        if !pub? or pair[0] is pub
+          stopListening__Base(pair[0], sub, event, callback)
       return
   
     stopListening__EventMap = (pub, sub, hash) ->
-      for own events, callback of hash
-        stopListening__EventString(pub, sub, events, (if typeof hash[events] is 'string' then sub[hash[events]] else hash[events]))
+      for events in objectKeys(hash)
+        stopListening__EventString(pub, sub, events, resolveCallback(sub, hash[events]))
       return
   
     stopListening__AnyEvent = (pub, sub, callback) ->
-      for oid, pair of sub._3 when !pub? or (ipub = pair[0]) is pub
-        for event of ipub._2
-          stopListening__Base(ipub, sub, event, callback)
+      listening = sub.__listening__
+      for oid in objectKeys(listening)
+        pair = listening[oid]
+        if !pub? or pair[0] is pub
+          listeners = pair[0].__listeners__
+          for event in objectKeys(listeners)
+            stopListening__Base(pair[0], sub, event, callback)
       return
   
     PS.stopListening = (object, events, callback) ->
-      if @_3?
+      if @__listening__?
         if !object? and !events? and !callback?
           stopListening__Everything(this)
   
         else if events?
           if typeof events is 'string'
-            stopListening__EventString(object, this, events, (if typeof callback is 'string' then this[callback] else callback))
+            stopListening__EventString(object, this, events, resolveCallback(this, callback))
           else
             stopListening__EventMap(object, this, events)
   
         else
-          stopListening__AnyEvent(object, this, (if typeof callback is 'string' then this[callback] else callback))
-  
+          stopListening__AnyEvent(object, this, resolveCallback(this, callback))
       this
-  
     return
   
   do ->
@@ -288,20 +292,18 @@
         else        array[idx - 1].apply(array[idx], args)                     while (idx += 3) < len
       return
   
-    triggerEvent = (ps, event, args) ->
-      list    = ps[event]
-      allList = ps.all
+    triggerEvent = (listeners, event, args) ->
+      list    = listeners[event]
+      listall = listeners.all
   
       if list?.length > 0
-        if allList?.length > 0
-          ref     = allList
-          allList = []
-          allList.push(el) for el in ref
+        if listall?.length > 0
+          listall = listall.slice()
         runCallbacks(list, args)
   
-      if allList?.length > 0
+      if listall?.length > 0
         args.unshift(event)
-        runCallbacks(allList, args)
+        runCallbacks(listall, args)
         args.shift()
       return
   
@@ -318,28 +320,28 @@
       return
   
     PS.trigger = PS.notify = (events) ->
-      if (ps = @_2)? and (l = arguments.length) > 0
+      if (listeners = @__listeners__)? and (l = arguments.length) > 0
   
-        # If space-separated events
-        # or there entries for [event]
-        # or there entries for `all` event
-        if (idx = events.indexOf(' ')) > -1 or ps[events]?.length > 0 or ps.all?.length > 0
+        # If events are space-separated
+        # or there are entries for [event]
+        # or there are entries for `all` event
+        if (idx = events.indexOf(' ')) > -1 or listeners[events]?.length > 0 or listeners.all?.length > 0
           k           = 0
           args        = []
           args.push(arguments[k]) while ++k < l
           if idx > -1
-            triggerEachEvent(ps, events, args)
+            triggerEachEvent(listeners, events, args)
           else
-            triggerEvent(ps, events, args)
+            triggerEvent(listeners, events, args)
       this
     return
   
   do ->
     unbind__Base = (object, event, cb, ctx) ->
-      return unless (e = object._2[event])?
+      return unless (e = object.__listeners__[event])?
       return if (len = e.length) < 3
   
-      r = null
+      r = []
       k = -1
   
       while (k += 3) < len
@@ -349,9 +351,9 @@
           decrementListeningCount(object, sub, 1) if (sub = e[k-2])?
   
         else
-          (r ?= []).push(e[k-2], e[k-1], e[k])
+          r.push(e[k-2], e[k-1], e[k])
   
-      object._2[event] = r
+      object.__listeners__[event] = r
       return
   
     unbind__EventString = (object, events, callback, context) ->
@@ -367,30 +369,32 @@
       return
   
     unbind__EventMap = (object, hash, context) ->
-      for events of hash
-        unbind__EventString(object, events, (if typeof hash[events] is 'string' then object[hash[events]] else hash[events]), context)
+      for events in objectKeys(hash)
+        unbind__EventString(object, events, resolveCallback(object, hash[events]), context)
       return
   
     unbind__Everything = (object) ->
-      for event, entries of object._2 when entries?
-        for sub in entries by 3 when sub?
-          decrementListeningCount(object, sub, 1)
-      object._2 = null
+      listeners = object.__listeners__
+      for event in objectKeys(listeners)
+        if (entries = listeners[event])?
+          for sub in entries by 3 when sub?
+            decrementListeningCount(object, sub, 1)
+      object.__listeners__ = null
       return
   
     unbind__AnyEvent = (object, callback, context) ->
-      for event of object._2
+      for event in objectKeys(object.__listeners__)
         unbind__Base(object, event, callback, context)
       return
   
     PS.unbind = PS.off = (events, callback, context) ->
-      if @_2?
+      if @__listeners__?
         if !events? and !callback? and !context?
           unbind__Everything(this)
   
         else if events?
           if typeof events is 'string'
-            unbind__EventString(this, events, (if typeof callback is 'string' then this[callback] else callback), context)
+            unbind__EventString(this, events, resolveCallback(this, callback), context)
           else
             unbind__EventMap(this, events, context ? callback)
   
