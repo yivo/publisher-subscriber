@@ -26,7 +26,6 @@
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^2.0.0",
     "jasmine": "^2.2.1",
-    "microtime": "^2.1.2",
     "underscore": "^1.8.3"
   }
 }
