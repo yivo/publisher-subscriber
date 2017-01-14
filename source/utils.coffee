@@ -4,6 +4,8 @@ objectKeys          = __root__._?.keys ? Object.keys
 
 objectCreate        = if Object.create? then -> Object.create(null) else -> {}
 
+objectFreeze        = Object.freeze ? ->
+
 safeGetOID          = (object) -> object.oid ?= generateOID()
 
 safeGetListeners    = (object) -> object.__listeners__ ?= objectCreate()
@@ -36,3 +38,7 @@ isNoisy = (options) ->
   options isnt false and options?.silent isnt true
 
 isEventable = (obj) -> obj?.on is PS.on
+
+ANY_CONTEXT = objectCreate()
+
+objectFreeze(ANY_CONTEXT)
