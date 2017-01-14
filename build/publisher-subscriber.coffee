@@ -265,7 +265,7 @@
   
     PS.stopListening = (object, events, callback) ->
       if @__listening__?
-        if !object? and !events? and !callback?
+        if arguments.length is 0
           stopListening__Everything(this)
   
         else if events?
@@ -389,7 +389,7 @@
   
     PS.unbind = PS.off = (events, callback, context) ->
       if @__listeners__?
-        if !events? and !callback? and !context?
+        if arguments.length is 0
           unbind__Everything(this)
   
         else if events?

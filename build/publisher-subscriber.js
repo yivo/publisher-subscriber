@@ -326,7 +326,7 @@
       };
       PS.stopListening = function(object, events, callback) {
         if (this.__listening__ != null) {
-          if ((object == null) && (events == null) && (callback == null)) {
+          if (arguments.length === 0) {
             stopListening__Everything(this);
           } else if (events != null) {
             if (typeof events === 'string') {
@@ -499,7 +499,7 @@
       };
       PS.unbind = PS.off = function(events, callback, context) {
         if (this.__listeners__ != null) {
-          if ((events == null) && (callback == null) && (context == null)) {
+          if (arguments.length === 0) {
             unbind__Everything(this);
           } else if (events != null) {
             if (typeof events === 'string') {

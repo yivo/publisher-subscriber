@@ -89,7 +89,7 @@ do ->
 
   PS.stopListening = (object, events, callback) ->
     if @__listening__?
-      if !object? and !events? and !callback?
+      if arguments.length is 0
         stopListening__Everything(this)
 
       else if events?
