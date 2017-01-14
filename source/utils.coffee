@@ -4,7 +4,7 @@ objectKeys          = __root__._?.keys ? Object.keys
 
 objectCreate        = if Object.create? then -> Object.create(null) else -> {}
 
-objectFreeze        = Object.freeze ? ->
+objectFreeze        = Object.freeze ? (object) -> object
 
 safeGetOID          = (object) -> object.oid ?= generateOID()
 

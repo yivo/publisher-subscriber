@@ -1,21 +1,27 @@
 {
   "name": "publisher-subscriber",
-  "main": "build/publisher-subscriber.js",
   "description": "Lightning fast Publisher-Subscriber pattern written in CoffeeScript. Compatible with Backbone.Events.",
+  "main": "build/publisher-subscriber.js",
   "authors": [
     "Yaroslav Konoplov <eahome00@gmail.com>"
   ],
   "license": "MIT",
+  "keywords": [
+    "pub-sub",
+    "publisher-subscriber",
+    "events",
+    "observable",
+    "event-emitter",
+    "mediator",
+    "callbacks",
+    "event-channel"
+  ],
+  "homepage": "https://github.com/yivo/publisher-subscriber",
   "ignore": [
+    "**/.*",
     "node_modules",
     "bower_components",
     "test",
-    "tests",
-    "spec",
-    "coffeespec",
-    "gulpfile.*",
-    ".travis",
-    ".gitignore",
-    "package.json"
+    "tests"
   ]
 }

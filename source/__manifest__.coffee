@@ -7,9 +7,10 @@ PS = {}
 # @include notify.coffee
 # @include unbind.coffee
 
-VERSION:         '1.0.11'
-isNoisy:         isNoisy
-isEventable:     isEventable
-InstanceMembers: PS
+objectFreeze
+  VERSION:         '1.0.12'
+  isNoisy:         isNoisy
+  isEventable:     isEventable
+  InstanceMembers: objectFreeze(PS)
 
 # TODO While loops: http://stackoverflow.com/questions/18640032/javascript-performance-while-vs-for-loops
